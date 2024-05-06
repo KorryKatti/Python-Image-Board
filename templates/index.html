@@ -1,0 +1,60 @@
+<!-- thanks to repos and stackoverflow -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* light green */
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .image-container {
+            margin-bottom: 20px;
+            overflow: hidden; /* Prevent images from overlapping */
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid white; /* Add border to images */
+        }
+        .image-details {
+            position: relative; /* Position details relative to image */
+            background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red background */
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px 0; /* Add padding to top and bottom */
+            width: 100%; /* Full width */
+            top: 0; /* Position at top */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Board</h1>
+        {% for image in images %}
+        <div class="image-container">
+            <div class="image-details">{{ image.filename }}</div>
+            <img src="{{ image.url }}" alt="Uploaded Image">
+        </div>
+        {% endfor %}
+        <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Upload Image</button>
+        </form>
+    </div>
+</body>
+</html>
