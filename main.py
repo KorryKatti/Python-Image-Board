@@ -1,17 +1,19 @@
-from flask import Flask, render_template, request, flash, redirect, url_for , send_file
+from flask import Flask, render_template, request, flash, redirect, url_for, send_file
 import requests
+import json
+import os
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Change this to your actual secret key  ( Just a combo of random strings )
+app.secret_key = 'secretkey'  # Change this to your actual secret key
 
 # API key for ImgBB
-API_KEY = 'YOUR_IMGBB_API_KEY'
+API_KEY = 'api'
 
 # URL for uploading images to ImgBB
 UPLOAD_URL = 'https://api.imgbb.com/1/upload'
 
-# A list to store uploaded image URLs
-uploaded_images = []
+# File to store uploaded image URLs
+IMAGE_FILE = 'uploaded_images.json'
 
 def upload_image_to_imgbb(image):
     try:
@@ -33,6 +35,20 @@ def upload_image_to_imgbb(image):
         print(f"Error uploading image: {e}")
         return None
 
+def save_uploaded_images(images):
+    with open(IMAGE_FILE, 'w') as file:
+        json.dump(images, file)
+
+def load_uploaded_images():
+    if os.path.exists(IMAGE_FILE):
+        with open(IMAGE_FILE, 'r') as file:
+            return json.load(file)
+    else:
+        return []
+
+# Load uploaded images from file when the app starts
+uploaded_images = load_uploaded_images()
+
 @app.route('/')
 def index():
     return render_template('index.html', images=uploaded_images)
@@ -45,8 +61,9 @@ def upload():
             # Upload the image to ImgBB and get the URL
             image_url = upload_image_to_imgbb(image)
             if image_url:
-                # Add the image URL to the list
-                uploaded_images.append({'url': image_url})
+                # Add the image URL to the beginning of the list
+                uploaded_images.insert(0, {'url': image_url})
+                save_uploaded_images(uploaded_images)
                 flash('Image uploaded successfully!', 'success')
             else:
                 flash('Failed to upload image. Please try again later.', 'error')
@@ -56,6 +73,10 @@ def upload():
         flash('An unexpected error occurred. Please try again later.', 'error')
 
     return redirect(url_for('index'))
+
+@app.route('/arc-sw.js')
+def serve_js():
+    return send_file('arc-sw.js')
 
 if __name__ == '__main__':
     app.run(debug=True)
