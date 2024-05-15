@@ -1,97 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script async src="https://arc.io/widget.min.js#QbkX6qw5"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thunder Image Board</title>
-    <style>
-        /* Basic styling, you can customize as needed */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0; /* light green */
-            color: #15202b; /* dark green text */
-        }
-        .container {
-            display: flex;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        .sidebar {
-            flex: 1;
-            padding-right: 20px;
-            border-right: 1px solid #ccc; /* Add border to separate sidebar */
-        }
-        .content {
-            flex: 3;
-            padding-left: 20px;
-        }
-        .warning {
-            background-color: #ffcccb; /* Light red background for warning */
-            padding: 10px;
-            margin-bottom: 20px;
-        }
-        .buttons {
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
-        .buttons button {
-            margin-right: 10px;
-        }
-        .image-container {
-            margin-bottom: 20px;
-            overflow: hidden; /* Prevent images from overlapping */
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border: 2px solid white; /* Add border to images */
-        }
-        .image-details {
-            position: relative; /* Position details relative to image */
-            background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red background */
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            padding: 5px 0; /* Add padding to top and bottom */
-            width: 100%; /* Full width */
-            top: 0; /* Position at top */
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>Advertisements</h2>
-            <!-- Add your advertisement content here -->
-            <a href="https://thunderenv.glitch.me/" target="_blank"><img src="https://files.catbox.moe/234s73.png" alt="Advertisement"></a>
-            <p>To Advertise here , contact <a href="https://twitter.com/korrykatti" target="_blank">here</a></p>
-        </div>
-        <div class="content">
-            <h1>Welcome To Thunder Image Board</h1>
-            <div class="warning">
-                <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as an image storage platform. Also, refrain from posting NSFW images.
-            </div>
-            <div class="buttons">
-                <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
-                    <input type="file" name="image" accept="image/*" required>
-                    <button type="submit">Upload Image</button>
-                </form>
-                <!-- Add other buttons here -->
-            </div>
-            {% for image in images %}
-            <div class="image-container">
-                <div class="image-details">{{ image.filename }}</div>
-                <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</body>
-</html>
+# Python file (app.py)
+
+from flask import Flask, render_template, request, flash, redirect, url_for, send_file, session
+import requests
+import json
+import os
+from datetime import datetime
+
+app = Flask(__name__)
+app.secret_key = 'CjHkhP2I3s4RkM2YQMyI2wLzN878FXD1'  # Change this to your actual secret key
+
+# API key for ImgBB
+API_KEY = 'a198dc754b03e55656be4fede01329ab'
+
+# URL for uploading images to ImgBB
+UPLOAD_URL = 'https://api.imgbb.com/1/upload'
+
+# File to store uploaded image URLs
+IMAGE_FILE = 'uploaded_images.json'
+
+# File to store total visitors count
+VISITORS_FILE = 'total_visitors.txt'
+
+def upload_image_to_imgbb(image):
+    try:
+        # Prepare the request data
+        files = {'image': image}
+        params = {'key': API_KEY}
+
+        # Make the POST request to upload the image
+        response = requests.post(UPLOAD_URL, files=files, params=params)
+        response.raise_for_status()  # Raise an error for bad status codes
+
+        # Parse the response JSON
+        data = response.json()
+
+        # Return the URL of the uploaded image
+        return data['data']['url']
+    except requests.exceptions.RequestException as e:
+        # Log the error or handle it appropriately
+        print(f"Error uploading image: {e}")
+        return None
+
+def save_uploaded_images(images):
+    with open(IMAGE_FILE, 'w') as file:
+        json.dump(images, file)
+
+def load_uploaded_images():
+    if os.path.exists(IMAGE_FILE):
+        with open(IMAGE_FILE, 'r') as file:
+            return json.load(file)
+    else:
+        return []
+
+def load_total_visitors():
+    if os.path.exists(VISITORS_FILE):
+        with open(VISITORS_FILE, 'r') as file:
+            return int(file.read())
+    else:
+        return 0
+
+def save_total_visitors(count):
+    with open(VISITORS_FILE, 'w') as file:
+        file.write(str(count))
+
+# Load uploaded images from file when the app starts
+uploaded_images = load_uploaded_images()
+
+# Load total visitors count from file
+total_visitors = load_total_visitors()
+
+# Function to update visitor stats
+def update_visitor_stats():
+    today = datetime.now().strftime('%Y-%m-%d')
+    if 'visitors' not in session:
+        session['visitors'] = {today: 1}
+    else:
+        if today in session['visitors']:
+            session['visitors'][today] += 1
+        else:
+            session['visitors'][today] = 1
+
+    # Increment total visitors count and save to file
+    global total_visitors
+    total_visitors += 1
+    save_total_visitors(total_visitors)
+
+@app.route('/')
+def index():
+    update_visitor_stats()  # Update visitor stats on each visit
+    today_visitors = session['visitors'].get(datetime.now().strftime('%Y-%m-%d'), 0)
+    return render_template('index.html', images=uploaded_images, total_visitors=total_visitors, today_visitors=today_visitors)
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    try:
+        if 'image' in request.files:
+            image = request.files['image']
+            title = request.form.get('title')  # Get the title from the form
+            # Upload the image to ImgBB and get the URL
+            image_url = upload_image_to_imgbb(image)
+            if image_url:
+                # Add the image URL and title to the beginning of the list
+                uploaded_images.insert(0, {'url': image_url, 'title': title})
+                save_uploaded_images(uploaded_images)
+                flash('Image uploaded successfully!', 'success')
+            else:
+                flash('Failed to upload image. Please try again later.', 'error')
+    except Exception as e:
+        # Log the error or handle it appropriately
+        print(f"Error uploading image: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+
+    return redirect(url_for('index'))
+
+@app.route('/arc-sw.js')
+def serve_js():
+    return send_file('arc-sw.js')
+
+if __name__ == '__main__':
+    app.run(debug=True)
