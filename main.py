@@ -1,25 +1,22 @@
-# Python file (app.py)
 
-from flask import Flask, render_template, request, flash, redirect, url_for, send_file, session
+
+from flask import Flask, render_template, request, flash, redirect, url_for, send_file
 import requests
 import json
 import os
-from datetime import datetime
+import time
 
 app = Flask(__name__)
-app.secret_key = 'randomstrings'  # Change this to your actual secret key
+app.secret_key = 'key'  # Change this to your actual secret key
 
 # API key for ImgBB
-API_KEY = 'imgbbapikey'
+API_KEY = 'key'
 
 # URL for uploading images to ImgBB
 UPLOAD_URL = 'https://api.imgbb.com/1/upload'
 
 # File to store uploaded image URLs
 IMAGE_FILE = 'uploaded_images.json'
-
-# File to store total visitors count
-VISITORS_FILE = 'total_visitors.txt'
 
 def upload_image_to_imgbb(image):
     try:
@@ -52,56 +49,23 @@ def load_uploaded_images():
     else:
         return []
 
-def load_total_visitors():
-    if os.path.exists(VISITORS_FILE):
-        with open(VISITORS_FILE, 'r') as file:
-            return int(file.read())
-    else:
-        return 0
-
-def save_total_visitors(count):
-    with open(VISITORS_FILE, 'w') as file:
-        file.write(str(count))
-
-# Load uploaded images from file when the app starts
-uploaded_images = load_uploaded_images()
-
-# Load total visitors count from file
-total_visitors = load_total_visitors()
-
-# Function to update visitor stats
-def update_visitor_stats():
-    today = datetime.now().strftime('%Y-%m-%d')
-    if 'visitors' not in session:
-        session['visitors'] = {today: 1}
-    else:
-        if today in session['visitors']:
-            session['visitors'][today] += 1
-        else:
-            session['visitors'][today] = 1
-
-    # Increment total visitors count and save to file
-    global total_visitors
-    total_visitors += 1
-    save_total_visitors(total_visitors)
-
 @app.route('/')
 def index():
-    update_visitor_stats()  # Update visitor stats on each visit
-    today_visitors = session['visitors'].get(datetime.now().strftime('%Y-%m-%d'), 0)
-    return render_template('index.html', images=uploaded_images, total_visitors=total_visitors, today_visitors=today_visitors)
+    uploaded_images = load_uploaded_images()
+    return render_template('index.html', images=uploaded_images)
 
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
         if 'image' in request.files:
             image = request.files['image']
-            title = request.form.get('title')  # Get the title from the form
+            title = f"{request.form.get('title')} - Uploaded at {int(time.time())}"  # Get the title from the form and append upload epoch time
             # Upload the image to ImgBB and get the URL
             image_url = upload_image_to_imgbb(image)
             if image_url:
                 # Add the image URL and title to the beginning of the list
-                uploaded_images.insert(0, {'url': image_url, 'title': title})
+                uploaded_images = load_uploaded_images()
+                uploaded_images.insert(0, {'url': image_url, 'title': title, 'comments': []})
                 save_uploaded_images(uploaded_images)
                 flash('Image uploaded successfully!', 'success')
             else:
@@ -109,6 +73,34 @@ def upload():
     except Exception as e:
         # Log the error or handle it appropriately
         print(f"Error uploading image: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+
+    return redirect(url_for('index'))
+
+@app.route('/add_comment/<int:image_index>', methods=['POST'])
+def add_comment(image_index):
+    try:
+        comment = request.form.get('comment')
+        if comment:
+            uploaded_images = load_uploaded_images()
+            if image_index < len(uploaded_images):
+                image = uploaded_images[image_index]
+                if 'comments' not in image:
+                    image['comments'] = []
+                if len(image['comments']) < 3:
+                    image['comments'].append(comment)
+                else:
+                    # Replace the oldest comment with the new comment
+                    image['comments'][:-1] = image['comments'][1:]
+                    image['comments'][-1] = comment
+                save_uploaded_images(uploaded_images)
+            else:
+                flash('Invalid image index.', 'error')
+        else:
+            flash('Comment cannot be empty.', 'error')
+    except Exception as e:
+        # Log the error or handle it appropriately
+        print(f"Error adding comment: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
 
     return redirect(url_for('index'))
