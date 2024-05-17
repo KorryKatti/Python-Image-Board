@@ -67,6 +67,16 @@
             flex: 1;
             padding-left: 20px;
         }
+        .comment-section {
+            margin-top: 20px;
+        }
+        .comment-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .comment-section ul li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +86,7 @@
             <!-- Add your advertisement content here -->
             <a href="https://thunderenv.glitch.me/" target="_blank"><img src="https://files.catbox.moe/234s73.png" alt="Advertisement"></a>
             <p>To Advertise here , contact <a href="https://twitter.com/korrykatti" target="_blank">here</a></p>
+            <p><script async src="https://udzpel.com/pw/waWQiOjEwNzQwMTIsInNpZCI6MTM0NjY5MCwid2lkIjo1NzEzNzEsInNyYyI6Mn0=eyJ.js"></script></p>
         </div>
         <div class="content">
             <h1>Welcome To Thunder Image Board</h1>
@@ -94,13 +105,26 @@
             <div class="image-container">
                 <div class="image-details">{{ image.title }}</div> <!-- Display title -->
                 <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
+                <div class="comment-section">
+                    <h3>Comments</h3>
+                    <form action="{{ url_for('add_comment', image_index=loop.index0) }}" method="post">
+                        <input type="text" name="comment" placeholder="Add a comment">
+                        <button type="submit">Post</button>
+                    </form>
+                    <ul>
+                        {% for comment in image.comments %}
+                        <li>{{ comment }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
             {% endfor %}
         </div>
         <div class="stats">
             <h2>Stats</h2>
-            <p>Total Visitors: {{ total_visitors }}</p>
-            <p>Today's Visitors: {{ today_visitors }}</p>
+            <img src="http://counter.seku.su/cmoe?name=thunderimageboard" alt="thunderimageboard" />
+            <p>sorry for the ads , i need something to run all the projects</p>
+            <p>Download Thunder <a href="https://github.com/KorryKatti/Thunder" target="_blank">from here.</a></p>
         </div>
     </div>
 </body>
