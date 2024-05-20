@@ -11,12 +11,12 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0; /* light green */
-            color: #15202b; /* dark green text */
+            background-color: #000; /* Black background */
+            color: #fff; /* White text */
         }
         .container {
             display: flex;
-            max-width: 1200px;
+            max-width: 120000px;
             margin: 20px auto;
             padding: 0 20px;
         }
@@ -116,6 +116,12 @@
                         <li>{{ comment }}</li>
                         {% endfor %}
                     </ul>
+                </div>
+                <div class="delete_image">
+                    <form action="{{ url_for('delete_image_with_password', image_index=loop.index0) }}" method="post">
+                        <input type="password" name="password" placeholder="Enter password">
+                        <button type="submit">Delete</button>
+                    </form>                                       
                 </div>
             </div>
             {% endfor %}
