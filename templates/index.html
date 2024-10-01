@@ -13,125 +13,138 @@
             padding: 0;
             background-color: #000; /* Black background */
             color: #fff; /* White text */
+            text-align: center; /* Center align all text */
         }
         .container {
-            display: flex;
-            max-width: 120000px;
+            max-width: 1200px; /* Corrected max-width value */
             margin: 20px auto;
             padding: 0 20px;
         }
-        .sidebar {
-            flex: 1;
-            padding-right: 20px;
-            border-right: 1px solid #ccc; /* Add border to separate sidebar */
+        h1 {
+            font-size: 24px; /* Reduced font size */
+            margin: 20px 0; /* Added margin for spacing */
         }
-        .content {
-            flex: 3;
-            padding-left: 20px;
+        hr {
+            border: 1px solid white; /* Style for horizontal rule */
+            margin: 20px auto; /* Spacing above and below the hr */
+            width: 80%; /* Width of the hr */
         }
-        .warning {
-            background-color: #ffcccb; /* Light red background for warning */
-            padding: 10px;
-            margin-bottom: 20px;
+        img {
+            display: block; /* Center image */
+            margin: 0 auto; /* Center align */
+            border: 2px solid white; /* Border for image */
         }
-        .buttons {
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
-        .buttons button {
-            margin-right: 10px;
-        }
-        .image-container {
-            margin-bottom: 20px;
-            overflow: hidden; /* Prevent images from overlapping */
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border: 2px solid white; /* Add border to images */
-        }
-        .image-details {
-            position: relative; /* Position details relative to image */
-            background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red background */
+        /* Popup textbox styles */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
             color: white;
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            padding: 5px 0; /* Add padding to top and bottom */
-            width: 100%; /* Full width */
-            top: 0; /* Position at top */
+            padding: 20px;
+            border: 1px solid #ccc;
+            z-index: 1000; /* Ensure it is above other elements */
+            display: none; /* Initially hidden */
+            border-radius: 8px;
+            max-width: 300px; /* Limit width */
+            text-align: center; /* Center align text */
         }
-        .stats {
-            flex: 1;
-            padding-left: 20px;
+        .popup .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
         }
-        .comment-section {
-            margin-top: 20px;
-        }
-        .comment-section ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .comment-section ul li {
-            margin-bottom: 5px;
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            z-index: 999; /* Ensure it is below the popup */
+            display: none; /* Initially hidden */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>Advertisements</h2>
-            <!-- Add your advertisement content here -->
-            <a href="https://thunderenv.glitch.me/" target="_blank"><img src="https://files.catbox.moe/234s73.png" alt="Advertisement"></a>
-            <p>To Advertise here , contact <a href="https://twitter.com/korrykatti" target="_blank">here</a></p>
-            <p><script async src="https://udzpel.com/pw/waWQiOjEwNzQwMTIsInNpZCI6MTM0NjY5MCwid2lkIjo1NzEzNzEsInNyYyI6Mn0=eyJ.js"></script></p>
-        </div>
-        <div class="content">
-            <h1>Welcome To Thunder Image Board</h1>
-            <div class="warning">
-                <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as an image storage platform. Also, refrain from posting NSFW images.
-            </div>
-            <div class="buttons">
-                <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
-                    <input type="file" name="image" accept="image/*" required>
-                    <input type="text" name="title" placeholder="Optional title"> <!-- Add input field for title -->
-                    <button type="submit">Upload Image</button>
-                </form>
-                <!-- Add other buttons here -->
-            </div>
-            {% for image in images %}
-            <div class="image-container">
-                <div class="image-details">{{ image.title }}</div> <!-- Display title -->
-                <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
-                <div class="comment-section">
-                    <h3>Comments</h3>
-                    <form action="{{ url_for('add_comment', image_index=loop.index0) }}" method="post">
-                        <input type="text" name="comment" placeholder="Add a comment">
-                        <button type="submit">Post</button>
-                    </form>
-                    <ul>
-                        {% for comment in image.comments %}
-                        <li>{{ comment }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="delete_image">
-                    <form action="{{ url_for('delete_image_with_password', image_index=loop.index0) }}" method="post">
-                        <input type="password" name="password" placeholder="Enter password">
-                        <button type="submit">Delete</button>
-                    </form>                                       
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="stats">
-            <h2>Stats</h2>
-            <img src="http://counter.seku.su/cmoe?name=thunderimageboard" alt="thunderimageboard" />
-            <p>sorry for the ads , i need something to run all the projects</p>
-            <p>Download Thunder <a href="https://github.com/KorryKatti/Thunder" target="_blank">from here.</a></p>
-        </div>
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <button class="close-btn" id="close-popup">&times;</button>
+        <h2>Latest Updates</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur in libero nec elit bibendum placerat.</p>
     </div>
+
+    <div class="container">
+        <h1>Welcome To Python Image Board</h1>
+        <hr style="border: 1px solid white; margin: 20px auto; width: 80%;">
+        
+        <img src="https://i.pinimg.com/originals/84/df/51/84df51b4bb34f6fb7f02c5d85fd9c960.gif" 
+             alt="Dummy Image" 
+             style="display: block; margin: 0 auto; border: 2px solid white; height: 400px; width: 800px;">
+
+        <hr style="border: 1px solid white; margin: 20px auto; width: 80%;">
+
+        <table style="width: 60%; margin: 0 auto; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #555;">
+                    <th style="padding: 5px; color: white;">Topic</th>
+                    <th style="padding: 5px; color: white;">Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 5px;">Rules</td>
+                    <td style="padding: 5px;"><a href="/rules" style="color: white;">/rules</a></td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px;">Image Board</td>
+                    <td style="padding: 5px;">
+                        <ul style="padding: 0; margin: 0; list-style-type: none;">
+                            <li><a href="/thunder" style="color: white;">Thunder</a></li>
+                            <li><a href="/global" style="color: white;">Global</a></li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr style="border: 1px solid white; margin: 20px auto; width: 80%;">
+
+        <img src="https://i.pinimg.com/originals/44/eb/17/44eb17afabc36a2df89e9bed6494587b.gif" 
+             alt="Another Dummy Image" 
+             style="display: block; margin: 0 auto; border: 2px solid white; height: 400px; width: 800px;">
+
+        <footer style="margin-top: 20px; color: white;">
+            <p>&copy; 2024 Python Image Board. All rights reserved. This project is open source at <a href="https://github.com/korrykatti/python-image-board/">here</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Function to show the popup
+        function showPopup() {
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        // Function to close the popup
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // Event listeners
+        document.getElementById('close-popup').addEventListener('click', closePopup);
+        document.getElementById('overlay').addEventListener('click', closePopup);
+
+        // Show the popup when the page loads
+        window.onload = showPopup;
+    </script>
 </body>
+
 </html>

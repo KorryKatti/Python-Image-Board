@@ -1,14 +1,16 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, send_file
+from flask import Flask, render_template, request, flash, redirect, url_for, send_file, jsonify
 import requests
 import json
 import os
 import time
+from collections import defaultdict
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-app.secret_key = 'anystring'  # Change this to your actual secret key
+app.secret_key = os.getenv("secret_key")  # Change this to your actual secret key
 
 # API key for ImgBB
-API_KEY = 'key'
+API_KEY = os.getenv("api_key")
 
 # URL for uploading images to ImgBB
 UPLOAD_URL = 'https://api.imgbb.com/1/upload'
@@ -62,7 +64,12 @@ def delete_image(image_index):
 @app.route('/')
 def index():
     uploaded_images = load_uploaded_images()
-    return render_template('index.html', images=uploaded_images)
+    return render_template('index.html')
+
+@app.route('/thunder')
+def thunder():
+    uploaded_images = load_uploaded_images()
+    return render_template('thunder.html', images=uploaded_images)
 
 
 @app.route('/upload', methods=['POST'])
@@ -116,7 +123,7 @@ def delete_image_with_password(image_index):
     try:
         password = request.form.get('password')
         # Check if the provided password matches the expected password
-        if password == 'your_password':
+        if password == 'your':
             delete_image(image_index)
         else:
             flash('Incorrect password.', 'error')
@@ -127,10 +134,6 @@ def delete_image_with_password(image_index):
 
     return redirect(url_for('index'))
 
-
-@app.route('/arc-sw.js')
-def serve_js():
-    return send_file('arc-sw.js')
 
 
 if __name__ == '__main__':
