@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://arc.io/widget.min.js#QbkX6qw5"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thunder Image Board</title>
+    <style>
+        /* Basic styling, you can customize as needed */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000; /* Black background */
+            color: #fff; /* White text */
+        }
+        .container {
+            display: flex;
+            max-width: 1200px; /* Corrected max-width value */
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .sidebar {
+            flex: 1;
+            padding-right: 20px;
+            border-right: 1px solid #ccc; /* Add border to separate sidebar */
+        }
+        .content {
+            flex: 3;
+            padding-left: 20px;
+        }
+        .warning {
+            background-color: #ffcccb; /* Light red background for warning */
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .buttons button {
+            margin-right: 10px;
+        }
+        .image-container {
+            margin-bottom: 20px;
+            overflow: hidden; /* Prevent images from overlapping */
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid white; /* Add border to images */
+        }
+        .image-details {
+            position: relative; /* Position details relative to image */
+            background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red background */
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px 0; /* Add padding to top and bottom */
+            width: 100%; /* Full width */
+            top: 0; /* Position at top */
+        }
+        .stats {
+            flex: 1;
+            padding-left: 20px;
+        }
+        .comment-section {
+            margin-top: 20px;
+        }
+        .comment-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .comment-section ul li {
+            margin-bottom: 5px;
+        }
+        /* Popup textbox styles */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            z-index: 1000; /* Ensure it is above other elements */
+            display: none; /* Initially hidden */
+            border-radius: 8px;
+            max-width: 300px; /* Limit width */
+            text-align: center; /* Center align text */
+        }
+        .popup .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            z-index: 999; /* Ensure it is below the popup */
+            display: none; /* Initially hidden */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Advertisements</h2>
+            <a href="https://thunderenv.glitch.me/" target="_blank"><img src="https://files.catbox.moe/234s73.png" alt="Advertisement"></a>
+            <p>To Advertise here, contact <a href="https://twitter.com/korrykatti" target="_blank">here</a></p>
+            <p><script async src="https://udzpel.com/pw/waWQiOjEwNzQwMTIsInNpZCI6MTM0NjY5MCwid2lkIjo1NzEzNzEsInNyYyI6Mn0=eyJ.js"></script></p>
+        </div>
+        <div class="content">
+            <h1>Welcome To Thunder Image Board</h1>
+            <div class="warning">
+                <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as an image storage platform. Also, refrain from posting NSFW images.
+            </div>
+            <div class="buttons">
+                <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+                    <input type="file" name="image" accept="image/*" required>
+                    <input type="text" name="title" placeholder="Optional title"> <!-- Add input field for title -->
+                    <button type="submit">Upload Image</button>
+                </form>
+                <!-- Add other buttons here -->
+            </div>
+            {% for image in images %}
+            <div class="image-container">
+                <div class="image-details">{{ image.title }}</div> <!-- Display title -->
+                <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
+                <div class="comment-section">
+                    <h3>Comments</h3>
+                    <form action="{{ url_for('add_comment', image_index=loop.index0) }}" method="post">
+                        <input type="text" name="comment" placeholder="Add a comment">
+                        <button type="submit">Post</button>
+                    </form>
+                    <ul>
+                        {% for comment in image.comments %}
+                        <li>{{ comment }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="delete_image">
+                    <form action="{{ url_for('delete_image_with_password', image_index=loop.index0) }}" method="post">
+                        <input type="password" name="password" placeholder="Enter password">
+                        <button type="submit">Delete</button>
+                    </form>                                       
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="stats">
+            <h2>Stats</h2>
+            <img src="http://counter.seku.su/cmoe?name=thunderimageboard" alt="thunderimageboard" />
+            <p>Sorry for the ads, I need something to run all the projects</p>
+            <p>Download Thunder <a href="https://github.com/KorryKatti/Thunder" target="_blank">from here.</a></p>
+        </div>
+    </div>
+    
+    <!-- Popup structure -->
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <button class="close-btn" id="close-popup">&times;</button>
+        <h2>Latest Updates</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur in libero nec elit bibendum placerat.</p>
+    </div>
+
+    <script>
+        // Function to show the popup
+        function showPopup() {
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        // Function to close the popup
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // Event listeners
+        document.getElementById('close-popup').addEventListener('click', closePopup);
+        document.getElementById('overlay').addEventListener('click', closePopup);
+
+        // Show the popup when the page loads
+        window.onload = showPopup;
+    </script>
+</body>
+</html>
