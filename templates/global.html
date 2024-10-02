@@ -6,92 +6,186 @@
     <title>Global Image Board</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
             margin: 0;
             padding: 0;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
         h1 {
             text-align: center;
-            color: white;
+            color: #E0E0E0;
+            font-size: 36px;
+            margin-bottom: 40px;
         }
+
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
         }
+
         .image-item {
-            background-color: #333;
-            border-radius: 5px;
+            background-color: #1f1f1f;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
+
         .image-item img {
             width: 100%;
             height: 200px;
             object-fit: cover;
+            border-bottom: 1px solid #333;
         }
+
         .image-info {
-            padding: 10px;
+            padding: 15px;
         }
+
         .image-info h3 {
             margin: 0;
-            font-size: 16px;
-            color: white;
+            font-size: 18px;
+            color: #E0E0E0;
         }
+
         .image-info p {
-            margin: 5px 0 0;
+            margin-top: 8px;
             font-size: 14px;
-            color: #ccc;
+            color: #B0B0B0;
         }
+
         .warning {
-            background-color: #ffcc00;
-            color: black;
-            padding: 10px;
+            background-color: #FF9800;
+            color: #121212;
+            padding: 15px;
             margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        /* Popup styles */
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            z-index: 1000;
-            display: none;
             border-radius: 8px;
-            max-width: 300px;
-            text-align: center;
         }
-        .popup .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
+
+        /* Modern Upload Form */
+        .upload-form {
+            background-color: #1f1f1f;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+
+        .upload-form h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #E0E0E0;
+        }
+
+        .upload-form input[type="text"] {
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 999;
-            display: none;
+            padding: 12px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            background-color: #2C2C2C;
+            color: #E0E0E0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .upload-form input[type="file"] {
+            border: none;
+            padding: 12px;
+            background-color: #333;
+            color: #E0E0E0;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .upload-form button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: #6200EE;
+            color: white;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-form button:hover {
+            background-color: #3700B3;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 250px;
+            border: 2px dashed #6200EE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background-color: #333;
+            border-radius: 10px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+
+        /* Comment and Delete Form Styling */
+        form input[type="text"], form input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #2C2C2C;
+            color: #E0E0E0;
+            font-size: 16px;
+        }
+
+        form button {
+            padding: 10px 15px;
+            background-color: #6200EE;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: #3700B3;
+        }
+
+        /* Flash message styles */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        ul li {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        ul li.success {
+            background-color: #4CAF50;
+        }
+
+        ul li.error {
+            background-color: #F44336;
         }
     </style>
 </head>
@@ -105,6 +199,32 @@
             <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as an image storage platform. Also, refrain from posting NSFW images.
         </div>
 
+        <!-- Modern Upload Form with Image Preview -->
+        <div class="upload-form">
+            <h3>Upload an Image</h3>
+            <!-- Image preview box -->
+            <div class="image-preview" id="imagePreview">
+                <span>No image selected</span>
+            </div>
+            <form action="/upload_global" method="POST" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Image Title" required>
+                <input type="file" name="image" accept="image/*" id="imageInput" required>
+                <button type="submit">Upload Image</button>
+            </form>
+        </div>
+
+        <!-- Flash messages for feedback -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Image grid displaying uploaded images -->
         <div class="image-grid">
             {% for image in images %}
             <div class="image-item">
@@ -113,6 +233,25 @@
                     <h3>{{ image.title }}</h3>
                     <p>Uploaded at: {{ image.upload_time }}</p>
                 </div>
+
+                <!-- Comments section -->
+                <ul>
+                    {% for comment in image.comments %}
+                    <li>{{ comment }}</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Add comment form -->
+                <form action="/add_comment/{{ loop.index0 }}" method="POST">
+                    <input type="text" name="comment" placeholder="Add a comment">
+                    <button type="submit">Add Comment</button>
+                </form>
+
+                <!-- Delete image form -->
+                <form action="/delete_image/{{ loop.index0 }}" method="POST">
+                    <input type="password" name="password" placeholder="Password">
+                    <button type="submit">Delete Image</button>
+                </form>
             </div>
             {% endfor %}
         </div>
@@ -140,6 +279,31 @@
 
         // Show popup when page loads
         window.onload = showPopup;
+
+        // Image preview functionality
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                imagePreview.innerHTML = ''; // Clear the preview box
+                reader.addEventListener('load', function() {
+                    const img = document.createElement('img');
+            
+                    img.src = reader.result;
+                    imagePreview.appendChild(img);
+                });
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.innerHTML = '<span>No image selected</span>';
+            }
+        });
     </script>
+
 </body>
 </html>
+
+            
