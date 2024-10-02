@@ -60,6 +60,9 @@ def delete_image(image_index):
         print(f"Error deleting image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
 
+@app.route('/global')
+def global_page():
+    return render_template('global.html')
 
 @app.route('/')
 def index():
