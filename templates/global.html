@@ -114,8 +114,9 @@
             /* background-color: #1a1a1a; */
             justify-content: center;
             overflow: hidden;
-            /*  */
+            margin-bottom: 20px;
         }
+        
 
         .upload-section form {
             display: flex;
@@ -126,7 +127,8 @@
         }
 
         input[type="file"],
-        input[type="text"] {
+        input[type="text"],
+        input[type="password"] {
             padding: 15px;
             border: none;
             outline: none;
@@ -173,9 +175,9 @@
 
         .btn::before {
             content: "";
-            background: linear-gradient(45deg,
+            /* background: linear-gradient(45deg,
                     #FF0000, #FF7300, #FFFb00, #48FF00,
-                    #00FFd5, #002bFF, #FF00c8, #FF0000);
+                    #00FFd5, #002bFF, #FF00c8, #FF0000); */
             position: absolute;
             top: -2px;
             left: -2px;
@@ -184,13 +186,13 @@
             width: calc(100%+4px);
             height: calc(100%+4px);
             filter: blur(8px);
-            animation: glowing 20s linear infinite;
+            /* animation: glowing 20s linear infinite; */
             transition: opacity .3s ease-in-out;
             border-radius: 10px;
             opacity: 1;
         }
 
-        @keyframes glowing {
+        /* @keyframes glowing {
             0% {
                 background-position: 0 0;
             }
@@ -202,7 +204,7 @@
             100% {
                 background-position: 0 0;
             }
-        }
+        } */
 
         .btn::after {
             content: "";
@@ -231,6 +233,10 @@
         }
         #global-comment-btn{
             margin-top: 15px;
+        }
+        #delete_btn{
+            margin-top: 15px;
+            background-color: red;
         }
         .image-container {
             margin-bottom: 20px;
@@ -268,6 +274,9 @@
         .comment-section ul li {
             margin-bottom: 5px;
         }
+        .delete_image{
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -302,11 +311,17 @@
 
 
 
-            
+            <div class="image-section">
             {% for image in images %}
             <div class="image-container">
                 <div class="image-details">{{ image.title }}</div> <!-- Display title -->
                 <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
+                <div class="delete_image"></div>
+                    <form action="{{ url_for('delete_global_image_with_password', image_index=loop.index0) }}" method="post">
+                        <input type="password" name="password" placeholder="Enter password">
+                        <button type="submit"class="btn" id="delete_btn">Delete</button>
+                    </form>                                       
+                </div>
                 <div class="comment-section">
                     <h3>Comments</h3>
                     <form action="{{ url_for('add_global_comment', image_index=loop.index0) }}" method="post">
@@ -321,6 +336,7 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
         </div>
     </div>
 

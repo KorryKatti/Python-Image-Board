@@ -1,3 +1,4 @@
+from email.mime import image
 from flask import Flask, render_template, request, flash, redirect, url_for, send_file, jsonify
 import requests
 import json
@@ -75,6 +76,19 @@ def delete_image(image_index):
         print(f"Error deleting image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
 
+def delete_global_image(image_index):
+    try:
+        uploaded_images = load_global_uploaded_images()
+        del uploaded_images[image_index]
+        save_global_uploaded_images(uploaded_images)
+        flash('Image has been deleted.', 'success')
+        return uploaded_images
+    except IndexError:
+        flash('Invalid image index.', 'error')
+    except Exception as e:
+        print(f"Error deleting image: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+
 @app.route('/global')
 def global_page():
     uploaded_images = load_global_uploaded_images()
@@ -97,7 +111,8 @@ def upload_global():
     except Exception as e:
         print(f"Error uploading image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
-    return redirect(url_for('index'))
+    # return redirect(url_for('index'))
+    return render_template('global.html', images=uploaded_images)
 
 @app.route('/add_global_comment/<int:image_index>', methods=['POST'])
 def add_global_comment(image_index):
@@ -122,7 +137,8 @@ def add_global_comment(image_index):
     except Exception as e:
         print(f"Error adding comment: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
-    return redirect(url_for('index'))
+    # return redirect(url_for('index'))
+    return render_template('global.html', images=uploaded_images)
 
 @app.route('/')
 def index():
@@ -197,6 +213,25 @@ def delete_image_with_password(image_index):
 
     return redirect(url_for('index'))
 
+@app.route('/delete_global_image/<int:image_index>', methods=['POST'])
+def delete_global_image_with_password(image_index):
+    try:
+        password = request.form.get('password')
+        # Check if the provided password matches the expected password
+        if password == 'your':
+            uploaded_images= delete_global_image(image_index)
+            return render_template('global.html',images=uploaded_images)
+        else:
+            flash('Incorrect password.', 'error')
+            uploaded_images= load_global_uploaded_images()
+            return render_template('global.html',images=uploaded_images)
+    except Exception as e:
+        # Log the error or handle it appropriately
+        print(f"Error deleting image: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+
+    # return redirect(url_for('/global'))
+    return render_template('global.html',images=uploaded_images)
 
 
 if __name__ == '__main__':
