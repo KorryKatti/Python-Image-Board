@@ -41,7 +41,7 @@
 
         .image-item img {
             width: 100%;
-            height: 200px;
+            height: auto; /* Maintain aspect ratio */
             object-fit: cover;
             border-bottom: 1px solid #333;
         }
@@ -87,13 +87,14 @@
 
         .upload-form input[type="text"] {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             border: 2px solid #333;
             border-radius: 6px;
             background-color: #2C2C2C;
             color: #E0E0E0;
             margin-bottom: 15px;
             font-size: 16px;
+            transition: border-color 0.3s; /* Smooth transition on focus */
         }
 
         .upload-form input[type="file"] {
@@ -123,69 +124,73 @@
         }
 
         .image-preview {
-            width: 100%;
-            height: 250px;
-            border: 2px dashed #6200EE;
+            width: 100%;          /* Full width of the parent */
+            height: 400px;       /* Increased height for a larger preview */
+            border: 2px dashed #6200EE; /* Border color for emphasis */
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            background-color: #333;
-            border-radius: 10px;
+            align-items: center;  /* Centering content vertically */
+            justify-content: center; /* Centering content horizontally */
+            margin-bottom: 20px;  /* Space below the preview box */
+            background-color: #333; /* Dark background */
+            border-radius: 10px;   /* Rounded corners */
+            overflow: hidden;       /* Hides overflowing image */
+            transition: border-color 0.3s; /* Smooth transition effect */
+            position: relative;     /* Positioning context for pseudo-element */
+        }
+
+        .image-preview::before {
+            content: '';              /* Pseudo-element for aspect ratio */
+            display: block;
+            padding-top: 75%;        /* 4:3 Aspect ratio (3/4 = 75%) */
         }
 
         .image-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 10px;
+            position: absolute;      /* Position the image absolutely within the box */
+            top: 50%;                /* Center the image vertically */
+            left: 50%;               /* Center the image horizontally */
+            transform: translate(-50%, -50%); /* Offset to center */
+            max-width: 100%;        /* Ensure the image does not exceed box width */
+            max-height: 100%;       /* Ensure the image does not exceed box height */
+            border-radius: 10px;    /* Keep rounded corners for the image */
+            object-fit: cover;       /* Cover the entire preview area */
         }
 
-        /* Comment and Delete Form Styling */
-        form input[type="text"], form input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #333;
-            background-color: #2C2C2C;
-            color: #E0E0E0;
-            font-size: 16px;
-        }
 
-        form button {
-            padding: 10px 15px;
-            background-color: #6200EE;
+        /* Popup textbox styles */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
             color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            z-index: 1000; /* Ensure it is above other elements */
+            display: none; /* Initially hidden */
+            border-radius: 8px;
+            max-width: 300px; /* Limit width */
+            text-align: center; /* Center align text */
+        }
+        .popup .close-btn {
+            background: none;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        form button:hover {
-            background-color: #3700B3;
-        }
-
-        /* Flash message styles */
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-
-        ul li {
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
             color: white;
+            font-size: 20px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
         }
-
-        ul li.success {
-            background-color: #4CAF50;
-        }
-
-        ul li.error {
-            background-color: #F44336;
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            z-index: 999; /* Ensure it is below the popup */
+            display: none; /* Initially hidden */
         }
     </style>
 </head>
@@ -202,7 +207,6 @@
         <!-- Modern Upload Form with Image Preview -->
         <div class="upload-form">
             <h3>Upload an Image</h3>
-            <!-- Image preview box -->
             <div class="image-preview" id="imagePreview">
                 <span>No image selected</span>
             </div>
@@ -266,7 +270,6 @@
     </div>
 
     <script>
-        // Make closePopup function global
         window.closePopup = function() {
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('popup').style.display = 'none';
@@ -292,7 +295,6 @@
                 imagePreview.innerHTML = ''; // Clear the preview box
                 reader.addEventListener('load', function() {
                     const img = document.createElement('img');
-            
                     img.src = reader.result;
                     imagePreview.appendChild(img);
                 });
@@ -302,8 +304,5 @@
             }
         });
     </script>
-
 </body>
 </html>
-
-            
