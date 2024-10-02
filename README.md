@@ -12,7 +12,7 @@ This is a simple image board web application built with Python Flask. Users can 
 Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/KorryKatti/Python-Image-Board
+git clone https://github.com/KorryKatti/Python-Image-Board.git
 ```
 
 ### 2. Install Dependencies
@@ -21,7 +21,12 @@ Navigate to the project directory and install the required dependencies using pi
 
 ```bash
 cd Python-Image-Board
+
+# Method 1: using pip
 pip install -r requirements.txt
+
+# Method 2: using poetry
+poetry install
 ```
 
 ### 3. Configure the Application
