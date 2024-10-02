@@ -3,11 +3,20 @@ import requests
 import json
 import os
 import time
+import logging
 from collections import defaultdict
 from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = os.getenv("secret_key")  # Change this to your actual secret key
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[
+                        logging.FileHandler("app.log"),  # Log to a file
+                        logging.StreamHandler()            # Also log to console
+                    ])
 
 # API key for ImgBB
 API_KEY = os.getenv("api_key")
@@ -28,7 +37,7 @@ def upload_image_to_imgbb(image):
         data = response.json()
         return data['data']['url']
     except requests.exceptions.RequestException as e:
-        print(f"Error uploading image: {e}")
+        logging.error(f"Error uploading image: {e}")
         return None
 
 
@@ -44,7 +53,7 @@ def load_uploaded_images():
     except FileNotFoundError:
         return []
     except Exception as e:
-        print(f"Error loading uploaded images: {e}")
+        logging.error(f"Error loading uploaded images: {e}")
         return []
 
 
@@ -57,7 +66,7 @@ def delete_image(image_index):
     except IndexError:
         flash('Invalid image index.', 'error')
     except Exception as e:
-        print(f"Error deleting image: {e}")
+        logging.error(f"Error deleting image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
 
 @app.route('/global')
@@ -90,7 +99,7 @@ def upload():
             else:
                 flash('Failed to upload image. Please try again later.', 'error')
     except Exception as e:
-        print(f"Error uploading image: {e}")
+        logging.error(f"Error uploading image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
     return redirect(url_for('index'))
 
@@ -116,7 +125,7 @@ def add_comment(image_index):
         else:
             flash('Comment cannot be empty.', 'error')
     except Exception as e:
-        print(f"Error adding comment: {e}")
+        logging.error(f"Error adding comment: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
     return redirect(url_for('index'))
 
@@ -131,12 +140,10 @@ def delete_image_with_password(image_index):
         else:
             flash('Incorrect password.', 'error')
     except Exception as e:
-        # Log the error or handle it appropriately
-        print(f"Error deleting image: {e}")
+        logging.error(f"Error deleting image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
 
     return redirect(url_for('index'))
-
 
 
 if __name__ == '__main__':
