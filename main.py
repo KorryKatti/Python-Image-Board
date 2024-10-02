@@ -55,6 +55,52 @@ def load_uploaded_images():
     except Exception as e:
         logging.error(f"Error loading uploaded images: {e}")
         return []
+    
+# File to store uploaded image URLs for global board
+GLOBAL_IMAGE_FILE = 'global_images.json'
+
+# Function to load images from global image board
+def load_global_images():
+    try:
+        with open(GLOBAL_IMAGE_FILE, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        print(f"Error loading global images: {e}")
+        return []
+
+# Function to save images for global image board
+def save_global_images(images):
+    with open(GLOBAL_IMAGE_FILE, 'w') as file:
+        json.dump(images, file)
+
+
+@app.route('/global')
+def global_board():
+    global_images = load_global_images()  # Load images for the global board
+    return render_template('global.html', images=global_images)
+
+
+@app.route('/upload_global', methods=['POST'])
+def upload_global():
+    try:
+        if 'image' in request.files:
+            image = request.files['image']
+            title = f"{request.form.get('title')} - Uploaded at {int(time.time())}"
+            image_url = upload_image_to_imgbb(image)
+            if image_url:
+                global_images = load_global_images()
+                global_images.insert(0, {'url': image_url, 'title': title, 'comments': []})
+                save_global_images(global_images)
+                flash('Image uploaded successfully to global board!', 'success')
+            else:
+                flash('Failed to upload image to global board. Please try again later.', 'error')
+    except Exception as e:
+        print(f"Error uploading image to global: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+    return redirect(url_for('global_board'))
+
 
 
 def delete_image(image_index):
@@ -82,6 +128,8 @@ def index():
 def thunder():
     uploaded_images = load_uploaded_images()
     return render_template('thunder.html', images=uploaded_images)
+
+
 
 
 @app.route('/upload', methods=['POST'])
