@@ -17,6 +17,7 @@ UPLOAD_URL = 'https://api.imgbb.com/1/upload'
 
 # File to store uploaded image URLs
 IMAGE_FILE = 'uploaded_images.json'
+GLOBAL_IMAGE_FILE = 'global_images.json'
 
 
 def upload_image_to_imgbb(image):
@@ -47,6 +48,20 @@ def load_uploaded_images():
         print(f"Error loading uploaded images: {e}")
         return []
 
+def save_global_uploaded_images(images):
+    with open(GLOBAL_IMAGE_FILE, 'w') as file:
+        json.dump(images, file)
+
+def load_global_uploaded_images():
+    try:
+        with open(GLOBAL_IMAGE_FILE, 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        print(f"Error loading uploaded images: {e}")
+        return []
+
 
 def delete_image(image_index):
     try:
@@ -62,7 +77,52 @@ def delete_image(image_index):
 
 @app.route('/global')
 def global_page():
-    return render_template('global.html')
+    uploaded_images = load_global_uploaded_images()
+    return render_template('global.html',images=uploaded_images)
+
+@app.route('/upload_global', methods=['POST'])
+def upload_global():
+    try:
+        if 'image' in request.files:
+            image = request.files['image']
+            title = f"{request.form.get('title')} - Uploaded at {int(time.time())}"
+            image_url = upload_image_to_imgbb(image)
+            if image_url:
+                uploaded_images = load_global_uploaded_images()
+                uploaded_images.insert(0, {'url': image_url, 'title': title, 'comments': []})
+                save_global_uploaded_images(uploaded_images)
+                flash('Image uploaded successfully!', 'success')
+            else:
+                flash('Failed to upload image. Please try again later.', 'error')
+    except Exception as e:
+        print(f"Error uploading image: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+    return redirect(url_for('index'))
+
+@app.route('/add_global_comment/<int:image_index>', methods=['POST'])
+def add_global_comment(image_index):
+    try:
+        comment = request.form.get('comment')
+        if comment:
+            uploaded_images = load_global_uploaded_images()
+            if image_index < len(uploaded_images):
+                image = uploaded_images[image_index]
+                if 'comments' not in image:
+                    image['comments'] = []
+                if len(image['comments']) < 3:
+                    image['comments'].append(comment)
+                else:
+                    image['comments'][:-1] = image['comments'][1:]
+                    image['comments'][-1] = comment
+                save_global_uploaded_images(uploaded_images)
+            else:
+                flash('Invalid image index.', 'error')
+        else:
+            flash('Comment cannot be empty.', 'error')
+    except Exception as e:
+        print(f"Error adding comment: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
+    return redirect(url_for('index'))
 
 @app.route('/')
 def index():

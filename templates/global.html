@@ -1,55 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Image Board</title>
     <style>
         body {
+
             font-family: Arial, sans-serif;
             background-color: #1a1a1a;
             color: white;
             margin: 0;
             padding: 0;
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
         h1 {
             text-align: center;
             color: white;
         }
+
         .image-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
         }
+
         .image-item {
             background-color: #333;
             border-radius: 5px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
+
         .image-item img {
             width: 100%;
             height: 200px;
             object-fit: cover;
         }
+
         .image-info {
             padding: 10px;
         }
+
         .image-info h3 {
             margin: 0;
             font-size: 16px;
             color: white;
         }
+
         .image-info p {
             margin: 5px 0 0;
             font-size: 14px;
             color: #ccc;
         }
+
         .warning {
             background-color: #ffcc00;
             color: black;
@@ -57,6 +68,7 @@
             margin-bottom: 20px;
             border-radius: 5px;
         }
+
         /* Popup styles */
         .popup {
             position: fixed;
@@ -73,6 +85,7 @@
             max-width: 300px;
             text-align: center;
         }
+
         .popup .close-btn {
             background: none;
             border: none;
@@ -83,6 +96,7 @@
             right: 10px;
             cursor: pointer;
         }
+
         .overlay {
             position: fixed;
             top: 0;
@@ -93,8 +107,170 @@
             z-index: 999;
             display: none;
         }
+
+        .upload-section {
+            display: flex;
+            align-items: center;
+            /* background-color: #1a1a1a; */
+            justify-content: center;
+            overflow: hidden;
+            /*  */
+        }
+
+        .upload-section form {
+            display: flex;
+            flex-direction: row;
+            /* Inputs and button will align vertically */
+            gap: 10px;
+            /* Space between inputs and button */
+        }
+
+        input[type="file"],
+        input[type="text"] {
+            padding: 15px;
+            border: none;
+            outline: none;
+            background-color: #333;
+            /* Same background as the button */
+            color: #fff;
+            border-radius: 12px;
+            width: 100%;
+            /* Adjust as needed */
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        input[type="file"]::file-selector-button {
+            padding: 10px;
+            border: none;
+            background-color: #444;
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        input[type="file"]:hover::file-selector-button,
+        input[type="text"]:hover {
+            background-color: #444;
+        }
+
+        input[type="text"]:focus {
+            background-color: #555;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            outline: none;
+            color: #fff;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            border-radius: 12px;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn::before {
+            content: "";
+            background: linear-gradient(45deg,
+                    #FF0000, #FF7300, #FFFb00, #48FF00,
+                    #00FFd5, #002bFF, #FF00c8, #FF0000);
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 600%;
+            z-index: -1;
+            width: calc(100%+4px);
+            height: calc(100%+4px);
+            filter: blur(8px);
+            animation: glowing 20s linear infinite;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+            opacity: 1;
+        }
+
+        @keyframes glowing {
+            0% {
+                background-position: 0 0;
+            }
+
+            50% {
+                background-position: 400% 0;
+            }
+
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        .btn::after {
+            content: "";
+            z-index: -1;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #333;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn:active::after {
+            background: transparent;
+        }
+
+        .btn:active {
+            color: #000;
+            font-weight: bold;
+            transform: scale(0.95);
+        }
+        #global-comment-btn{
+            margin-top: 15px;
+        }
+        .image-container {
+            margin-bottom: 20px;
+            overflow: hidden; /* Prevent images from overlapping */
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid white; /* Add border to images */
+        }
+        .image-details {
+            position: relative; /* Position details relative to image */
+            background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red background */
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px 0; /* Add padding to top and bottom */
+            width: 100%; /* Full width */
+            top: 0; /* Position at top */
+        }
+        .stats {
+            flex: 1;
+            padding-left: 20px;
+        }
+        .comment-section {
+            margin-top: 20px;
+        }
+        .comment-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .comment-section ul li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
+
 <body>
     {% include 'header.html' %}
 
@@ -102,16 +278,46 @@
         <h1>Global Image Board</h1>
 
         <div class="warning">
-            <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as an image storage platform. Also, refrain from posting NSFW images.
+            <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as
+            an image storage platform. Also, refrain from posting NSFW images.
+        </div>
+        <div class="upload-section">
+            <form action="{{ url_for('upload_global') }}" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required>
+                <input type="text" name="title" placeholder="Optional title">
+                <button type="submit" class="btn" id="upload">Upload image</button>
+            </form>
         </div>
 
-        <div class="image-grid">
+        <!-- <div class="image-grid">
             {% for image in images %}
             <div class="image-item">
                 <img src="{{ image.url }}" alt="{{ image.title }}">
                 <div class="image-info">
                     <h3>{{ image.title }}</h3>
                     <p>Uploaded at: {{ image.upload_time }}</p>
+                </div>
+            </div>
+            {% endfor %} -->
+
+
+
+            
+            {% for image in images %}
+            <div class="image-container">
+                <div class="image-details">{{ image.title }}</div> <!-- Display title -->
+                <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
+                <div class="comment-section">
+                    <h3>Comments</h3>
+                    <form action="{{ url_for('add_global_comment', image_index=loop.index0) }}" method="post">
+                        <input type="text" name="comment" placeholder="Add a comment">
+                        <button type="submit"class="btn" id="global-comment-btn">Post</button>
+                    </form>
+                    <ul>
+                        {% for comment in image.comments %}
+                        <li>{{ comment }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
             {% endfor %}
@@ -128,7 +334,7 @@
 
     <script>
         // Make closePopup function global
-        window.closePopup = function() {
+        window.closePopup = function () {
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('popup').style.display = 'none';
         }
@@ -142,4 +348,5 @@
         window.onload = showPopup;
     </script>
 </body>
+
 </html>
