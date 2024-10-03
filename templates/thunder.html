@@ -170,33 +170,6 @@
         </div>
     </div>
     
-    <!-- Popup structure -->
-    <div class="overlay" id="overlay"></div>
-    <div class="popup" id="popup">
-        <button class="close-btn" id="close-popup">&times;</button>
-        <h2>Latest Updates</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur in libero nec elit bibendum placerat.</p>
-    </div>
 
-    <script>
-        // Function to show the popup
-        function showPopup() {
-            document.getElementById('popup').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
-
-        // Function to close the popup
-        function closePopup() {
-            document.getElementById('popup').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-
-        // Event listeners
-        document.getElementById('close-popup').addEventListener('click', closePopup);
-        document.getElementById('overlay').addEventListener('click', closePopup);
-
-        // Show the popup when the page loads
-        window.onload = showPopup;
-    </script>
 </body>
 </html>
