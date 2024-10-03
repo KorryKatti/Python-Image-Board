@@ -72,6 +72,14 @@ def load_global_uploaded_images():
         print(f"Error loading uploaded images: {e}")
         return []
 
+@app.route('/latest-updates')
+def latest_updates():
+    # Read the latest updates from the text file
+    update_file_path = os.path.join(app.static_folder, 'latest_updates.txt')
+    with open(update_file_path, 'r') as f:
+        latest_update = f.read()
+    return jsonify({'latest_update': latest_update})
+
 
 def delete_image(image_index):
     try:
@@ -205,7 +213,7 @@ def upload():
     except Exception as e:
         logging.error(f"Error uploading image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
-    return redirect(url_for('index'))
+    return redirect(url_for('thunder'))
 
 
 
@@ -232,7 +240,7 @@ def add_comment(image_index):
     except Exception as e:
         logging.error(f"Error adding comment: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
-    return redirect(url_for('index'))
+    return redirect(url_for('thunder'))
 
 
 @app.route('/delete_image/<int:image_index>', methods=['POST'])
@@ -248,7 +256,7 @@ def delete_image_with_password(image_index):
         logging.error(f"Error deleting image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
 
-    return redirect(url_for('index'))
+    return redirect(url_for('thunder'))
 
 @app.route('/delete_global_image/<int:image_index>', methods=['POST'])
 def delete_global_image_with_password(image_index):
