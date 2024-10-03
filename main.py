@@ -109,19 +109,33 @@ def upload_global():
         if 'image' in request.files:
             image = request.files['image']
             title = f"{request.form.get('title')} - Uploaded at {int(time.time())}"
-            image_url = upload_image_to_imgbb(image)
+            image_path = os.path.join('uploads', image.filename)  # Save original image temporarily
+            image.save(image_path)  # Save the uploaded image temporarily
+            
+            # Resize the image
+            resized_image_path = resize_image(image_path)
+
+            # Upload the resized image to ImgBB
+            with open(resized_image_path, 'rb') as resized_image:
+                image_url = upload_image_to_imgbb(resized_image)
+            
             if image_url:
                 uploaded_images = load_global_uploaded_images()
                 uploaded_images.insert(0, {'url': image_url, 'title': title, 'comments': []})
                 save_global_uploaded_images(uploaded_images)
-                flash('Image uploaded successfully!', 'success')
+                flash('Image uploaded and resized successfully!', 'success')
             else:
                 flash('Failed to upload image. Please try again later.', 'error')
+            
+            # Clean up temporary files
+            os.remove(image_path)
+            os.remove(resized_image_path)
+
     except Exception as e:
-        print(f"Error uploading image: {e}")
+        logging.error(f"Error uploading image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
-    # return redirect(url_for('index'))
-    return render_template('global.html', images=uploaded_images)
+    return render_template('global.html', images=load_global_uploaded_images())
+
 
 @app.route('/add_global_comment/<int:image_index>', methods=['POST'])
 def add_global_comment(image_index):
@@ -166,18 +180,33 @@ def upload():
         if 'image' in request.files:
             image = request.files['image']
             title = f"{request.form.get('title')} - Uploaded at {int(time.time())}"
-            image_url = upload_image_to_imgbb(image)
+            image_path = os.path.join('uploads', image.filename)  # Save original image temporarily
+            image.save(image_path)  # Save the uploaded image temporarily
+            
+            # Resize the image
+            resized_image_path = resize_image(image_path)
+
+            # Upload the resized image to ImgBB
+            with open(resized_image_path, 'rb') as resized_image:
+                image_url = upload_image_to_imgbb(resized_image)
+            
             if image_url:
                 uploaded_images = load_uploaded_images()
                 uploaded_images.insert(0, {'url': image_url, 'title': title, 'comments': []})
                 save_uploaded_images(uploaded_images)
-                flash('Image uploaded successfully!', 'success')
+                flash('Image uploaded and resized successfully!', 'success')
             else:
                 flash('Failed to upload image. Please try again later.', 'error')
+            
+            # Clean up temporary files
+            os.remove(image_path)
+            os.remove(resized_image_path)
+
     except Exception as e:
         logging.error(f"Error uploading image: {e}")
         flash('An unexpected error occurred. Please try again later.', 'error')
     return redirect(url_for('index'))
+
 
 
 @app.route('/add_comment/<int:image_index>', methods=['POST'])
@@ -240,6 +269,5 @@ def delete_global_image_with_password(image_index):
 
     # return redirect(url_for('/global'))
     return render_template('global.html',images=uploaded_images)
-
 if __name__ == '__main__':
     app.run(debug=True)
