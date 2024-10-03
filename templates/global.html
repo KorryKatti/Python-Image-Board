@@ -342,27 +342,8 @@
 
     <div id="overlay" class="overlay"></div>
 
-    <div id="popup" class="popup">
-        <span class="close-btn" onclick="closePopup()">&times;</span>
-        <h2>Latest Updates</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur in libero nec elit bibendum placerat.</p>
-    </div>
 
-    <script>
-        // Make closePopup function global
-        window.closePopup = function () {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('popup').style.display = 'none';
-        }
-
-        function showPopup() {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('popup').style.display = 'block';
-        }
-
-        // Show popup when page loads
-        window.onload = showPopup;
-    </script>
+    
 </body>
 
 </html>
