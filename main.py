@@ -167,6 +167,10 @@ def thunder():
     uploaded_images = load_uploaded_images()
     return render_template('thunder.html', images=uploaded_images)
 
+@app.route('/rules')
+def rules():
+    uploaded_images = load_uploaded_images()
+    return render_template('rules.html',images=uploaded_images)
 
 @app.route('/upload', methods=['POST'])
 def upload():
