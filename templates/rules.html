@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rules</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            margin: 50px auto;
+            max-width: 800px;
+            border: 1px solid #444;
+            padding: 20px;
+            background-color: #222;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 10px;
+        }
+
+        ol {
+            text-align: left;
+            padding-left: 20px;
+            font-size: 1.1em;
+        }
+
+        ol li {
+            margin-bottom: 10px;
+        }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <div class="container">
+        <h1>Board Rules</h1>
+        <ol>
+            <li>Images may be cleared automatically, so do not use this as storage. Please avoid posting NSFW images.</li>
+            <li>No posting of illegal content. Images and comments should not offend the law.</li>
+            <li>No personal attacks and harassment. Respect with others.</li>
+            <li>Posting on topic. Postings should always be related to the topic of any posted image.</li>
+            <li>Board appropriate. Images should be posted only in its proper category.</li>
+            <li>Respect to other's privacy. Keep away from the spreading of personal info.</li>
+            <li>Do not spam.</li>
+            <li>All images are hosted on ImgBB. Make sure your uploads comply with their terms of service.</li>
+            <li>All comments must be constructive and civil. Posting abusive language is not tolerated.</li>
+            <li>Administrators retain the right to delete any post or comment they deem in violation of these rules.</li>
+            <li>Anything deleted is password-protected. Don't forget your password!</li>
+        </ol>
+    </div>
+
+    <footer>
+        <p>Back to <a href="/">Main Page</a></p>
+    </footer>
+</body>
+</html>

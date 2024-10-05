@@ -4,37 +4,78 @@
     <script async src="https://arc.io/widget.min.js#QbkX6qw5"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thunder Image Board</title>
+    <title>Python Image Board</title>
     <style>
-        /* Basic styling, you can customize as needed */
         body {
             font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: white;
+            background-color: #000000;
             margin: 0;
             padding: 0;
-            background-color: #000; /* Black background */
-            color: #fff; /* White text */
-            text-align: center; /* Center align all text */
         }
         .container {
-            max-width: 1200px; /* Corrected max-width value */
-            margin: 20px auto;
-            padding: 0 20px;
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 5px;
         }
         h1 {
-            font-size: 24px; /* Reduced font size */
-            margin: 20px 0; /* Added margin for spacing */
-        }
-        hr {
-            border: 1px solid white; /* Style for horizontal rule */
-            margin: 20px auto; /* Spacing above and below the hr */
-            width: 80%; /* Width of the hr */
+            text-align: center;
         }
         img {
-            display: block; /* Center image */
-            margin: 0 auto; /* Center align */
-            border: 2px solid white; /* Border for image */
+            max-width: 100%;
+            height: auto;
         }
-        /* Popup textbox styles */
+        .topics-links-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #373737;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .topic-row {
+            display: flex;
+            border-bottom: 1px solid #7d7d7d;
+        }
+        .topic-row:last-child {
+            border-bottom: none;
+        }
+        .topic, .links {
+            padding: 15px 20px;
+            color: #ecf0f1;
+        }
+        .topic {
+            flex-basis: 30%;
+            background-color: #292929;
+            font-weight: bold;
+        }
+        .links {
+            flex-basis: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+        .links a {
+            color: #d4d4d4;
+            text-decoration: none;
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+        .links a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); 
+            z-index: 999; 
+            display: none; 
+        }
         .popup {
             position: fixed;
             top: 50%;
@@ -44,11 +85,11 @@
             color: white;
             padding: 20px;
             border: 1px solid #ccc;
-            z-index: 1000; /* Ensure it is above other elements */
-            display: none; /* Initially hidden */
+            z-index: 1000; 
+            display: none;
             border-radius: 8px;
-            max-width: 300px; /* Limit width */
-            text-align: center; /* Center align text */
+            max-width: 300px;
+            text-align: center; 
         }
         .popup .close-btn {
             background: none;
@@ -60,92 +101,70 @@
             right: 10px;
             cursor: pointer;
         }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-            z-index: 999; /* Ensure it is below the popup */
-            display: none; /* Initially hidden */
-        }
     </style>
 </head>
 <body>
     {% include 'header.html' %}
-    <div class="overlay" id="overlay"></div>
-    <div class="popup" id="popup">
-        <button class="close-btn" id="close-popup">&times;</button>
-        <h2>Latest Updates</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur in libero nec elit bibendum placerat.</p>
-    </div>
 
+    <div id="overlay" class="overlay"></div>
     <div class="container">
         <h1>Welcome To Python Image Board</h1>
-        <hr style="border: 1px solid white; margin: 20px auto; width: 80%;">
-        
-        <img src="https://i.pinimg.com/originals/84/df/51/84df51b4bb34f6fb7f02c5d85fd9c960.gif" 
-             alt="Dummy Image" 
-             style="display: block; margin: 0 auto; border: 2px solid white; height: 400px; width: 800px;">
 
-        <hr style="border: 1px solid white; margin: 20px auto; width: 80%;">
+        <hr>
 
-        <table style="width: 60%; margin: 0 auto; border-collapse: collapse;">
-            <thead>
-                <tr style="background-color: #555;">
-                    <th style="padding: 5px; color: white;">Topic</th>
-                    <th style="padding: 5px; color: white;">Link</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding: 5px;">Rules</td>
-                    <td style="padding: 5px;"><a href="/rules" style="color: white;">/rules</a></td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px;">Image Board</td>
-                    <td style="padding: 5px;">
-                        <ul style="padding: 0; margin: 0; list-style-type: none;">
-                            <li><a href="/thunder" style="color: white;">Thunder</a></li>
-                            <li><a href="/global" style="color: white;">Global</a></li>
-                        </ul>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <img src="https://i.pinimg.com/originals/84/df/51/84df51b4bb34f6fb7f02c5d85fd9c960.gif" alt="Dummy Image" style="display: block; margin: 0 auto; border: 2px solid white; height: 400px; width: 800px;">
 
-        <hr style="border: 1px solid white; margin: 20px auto; width: 80%;">
+        <hr>
 
-        <img src="https://i.pinimg.com/originals/44/eb/17/44eb17afabc36a2df89e9bed6494587b.gif" 
-             alt="Another Dummy Image" 
-             style="display: block; margin: 0 auto; border: 2px solid white; height: 400px; width: 800px;">
+        <div class="topics-links-container">
+            <div class="topic-row">
+                <div class="topic">Rules</div>
+                <div class="links">
+                    <a href="/rules">View Rules</a>
+                </div>
+            </div>
+            <div class="topic-row">
+                <div class="topic">Image Board</div>
+                <div class="links">
+                    <a href="/thunder">Thunder</a>
+                    <a href="/global">Global</a>
+                </div>
+            </div>
+        </div>
 
-        <footer style="margin-top: 20px; color: white;">
-            <p>&copy; 2024 Python Image Board. All rights reserved. This project is open source at <a href="https://github.com/korrykatti/python-image-board/">here</a></p>
-        </footer>
+        <hr>
+
+        <img src="https://i.pinimg.com/originals/44/eb/17/44eb17afabc36a2df89e9bed6494587b.gif" alt="Another Dummy Image" style="display: block; margin: 0 auto; border: 2px solid white; height: 400px; width: 800px;">
+
+        <p style="text-align: center;">© 2024 Python Image Board. All rights reserved. This project is open source at <a href="https://github.com/korrykatti/python-image-board/" style="color: white;">here</a></p>
+    </div>
+
+    <div id="popup" class="popup">
+        <span class="close-btn" onclick="closePopup()">&times;</span>
+        <h2>Latest Updates:</h2>
+        <p id="latest-update"></p>
     </div>
 
     <script>
-        // Function to show the popup
-        function showPopup() {
-            document.getElementById('popup').style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
-        }
-
-        // Function to close the popup
-        function closePopup() {
-            document.getElementById('popup').style.display = 'none';
+        window.closePopup = function () {
             document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
         }
-
-        // Event listeners
-        document.getElementById('close-popup').addEventListener('click', closePopup);
-        document.getElementById('overlay').addEventListener('click', closePopup);
-
-        // Show the popup when the page loads
-        window.onload = showPopup;
+    
+        function showPopup() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popup').style.display = 'block';
+        }
+    
+        window.onload = function () {
+            fetch('/latest-updates')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('latest-update').textContent = data.latest_update;
+                    showPopup();
+                })
+                .catch(error => console.error('Error fetching the latest updates:', error));
+        }
     </script>
 </body>
-
 </html>

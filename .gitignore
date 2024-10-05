@@ -4,5 +4,9 @@ total_visitors.txt
 key.py
 .env
 app.log
+<<<<<<< HEAD
 uploaded_images.json
 global_images.json
+=======
+global_images.json
+>>>>>>> e6e1bb88d711043388ffd5aa9fd1219f6ed04562

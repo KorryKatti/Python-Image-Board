@@ -47,7 +47,7 @@ Replace `YOUR_IMGBB_API_KEY` and `YOUR_SECRET_KEY` with your actual API key and 
 You can now run the Flask application using the following command:
 
 ```bash
-python app.py
+python main.py
 ```
 
 The application will start running on [http://127.0.0.1:5000/](http://127.0.0.1:5000/).
