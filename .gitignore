@@ -4,3 +4,5 @@ total_visitors.txt
 key.py
 .env
 app.log
+uploaded_images.json
+global_images.json
