@@ -7,7 +7,6 @@
     <title>Global Image Board</title>
     <style>
         body {
-
             font-family: Arial, sans-serif;
             background-color: #1a1a1a;
             color: white;
@@ -111,19 +110,15 @@
         .upload-section {
             display: flex;
             align-items: center;
-            /* background-color: #1a1a1a; */
             justify-content: center;
             overflow: hidden;
             margin-bottom: 20px;
         }
-        
 
         .upload-section form {
             display: flex;
             flex-direction: row;
-            /* Inputs and button will align vertically */
             gap: 10px;
-            /* Space between inputs and button */
         }
 
         input[type="file"],
@@ -133,11 +128,9 @@
             border: none;
             outline: none;
             background-color: #333;
-            /* Same background as the button */
             color: #fff;
             border-radius: 12px;
             width: 100%;
-            /* Adjust as needed */
             box-sizing: border-box;
             font-size: 16px;
             transition: background-color 0.3s ease, color 0.3s ease;
@@ -175,9 +168,6 @@
 
         .btn::before {
             content: "";
-            /* background: linear-gradient(45deg,
-                    #FF0000, #FF7300, #FFFb00, #48FF00,
-                    #00FFd5, #002bFF, #FF00c8, #FF0000); */
             position: absolute;
             top: -2px;
             left: -2px;
@@ -186,25 +176,10 @@
             width: calc(100%+4px);
             height: calc(100%+4px);
             filter: blur(8px);
-            /* animation: glowing 20s linear infinite; */
             transition: opacity .3s ease-in-out;
             border-radius: 10px;
             opacity: 1;
         }
-
-        /* @keyframes glowing {
-            0% {
-                background-position: 0 0;
-            }
-
-            50% {
-                background-position: 400% 0;
-            }
-
-            100% {
-                background-position: 0 0;
-            }
-        } */
 
         .btn::after {
             content: "";
@@ -231,53 +206,88 @@
             font-weight: bold;
             transform: scale(0.95);
         }
-        #global-comment-btn{
+
+        #global-comment-btn {
             margin-top: 15px;
         }
-        #delete_btn{
+
+        #delete_btn {
             margin-top: 15px;
             background-color: red;
         }
+
         .image-container {
             margin-bottom: 20px;
-            overflow: hidden; /* Prevent images from overlapping */
+            overflow: hidden;
         }
+
         .image-container img {
             max-width: 100%;
             height: auto;
             display: block;
             margin: 0 auto;
-            border: 2px solid white; /* Add border to images */
+            border: 2px solid white;
         }
+
         .image-details {
-            position: relative; /* Position details relative to image */
-            background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent red background */
+            position: relative;
+            background-color: rgba(255, 0, 0, 0.5);
             color: white;
             font-size: 12px;
             font-weight: bold;
             text-align: center;
-            padding: 5px 0; /* Add padding to top and bottom */
-            width: 100%; /* Full width */
-            top: 0; /* Position at top */
+            padding: 5px 0;
+            width: 100%;
+            top: 0;
         }
+
         .stats {
             flex: 1;
             padding-left: 20px;
         }
+
         .comment-section {
             margin-top: 20px;
         }
+
         .comment-section ul {
             list-style-type: none;
             padding: 0;
         }
+
         .comment-section ul li {
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
         }
-        .delete_image{
+
+        .delete_image {
             margin-top: 20px;
         }
     </style>
+    <script>
+        function loadMoreComments(imageId, start) {
+            fetch(`/get_comments/${imageId}?start=${start}`)
+                .then(response => response.json())
+                .then(data => {
+                    const commentsContainer = document.getElementById(`comments-${imageId}`);
+                    data.comments.forEach(comment => {
+                        const commentElement = document.createElement('li');
+                        commentElement.textContent = comment.text;
+                        commentsContainer.appendChild(commentElement);
+                    });
+                    if (data.has_more) {
+                        const readMoreButton = document.getElementById(`read-more-${imageId}`);
+                        readMoreButton.setAttribute('onclick', `loadMoreComments('${imageId}', ${start + 5})`);
+                    } else {
+                        const readMoreButton = document.getElementById(`read-more-${imageId}`);
+                        readMoreButton.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching comments:', error));
+        }
+    </script>
 </head>
 
 <body>
@@ -298,52 +308,38 @@
             </form>
         </div>
 
-        <!-- <div class="image-grid">
-            {% for image in images %}
-            <div class="image-item">
-                <img src="{{ image.url }}" alt="{{ image.title }}">
-                <div class="image-info">
-                    <h3>{{ image.title }}</h3>
-                    <p>Uploaded at: {{ image.upload_time }}</p>
-                </div>
-            </div>
-            {% endfor %} -->
-
-
-
-            <div class="image-section">
+        <div class="image-section">
             {% for image in images %}
             <div class="image-container">
-                <div class="image-details">{{ image.title }}</div> <!-- Display title -->
+                <div class="image-details">{{ image.title }}</div>
                 <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
-                <div class="delete_image"></div>
+                <div class="delete_image">
                     <form action="{{ url_for('delete_global_image_with_password', image_index=loop.index0) }}" method="post">
                         <input type="password" name="password" placeholder="Enter password">
-                        <button type="submit"class="btn" id="delete_btn">Delete</button>
-                    </form>                                       
+                        <button type="submit" class="btn" id="delete_btn">Delete</button>
+                    </form>
                 </div>
                 <div class="comment-section">
                     <h3>Comments</h3>
-                    <form action="{{ url_for('add_global_comment', image_index=loop.index0) }}" method="post">
+                    <form action="{{ url_for('add_global_comment', image_id=image.id) }}" method="post">
                         <input type="text" name="comment" placeholder="Add a comment">
-                        <button type="submit"class="btn" id="global-comment-btn">Post</button>
+                        <button type="submit" class="btn" id="global-comment-btn">Post</button>
                     </form>
-                    <ul>
-                        {% for comment in image.comments %}
-                        <li>{{ comment }}</li>
+                    <ul id="comments-{{ image.id }}">
+                        {% for comment in image.comments[:3] %}
+                        <li>{{ comment.text }}</li>
                         {% endfor %}
                     </ul>
+                    {% if image.comments|length > 3 %}
+                    <button id="read-more-{{ image.id }}" onclick="loadMoreComments('{{ image.id }}', 3)" class="btn">Read more</button>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
-        </div>
     </div>
 
     <div id="overlay" class="overlay"></div>
-
-
-    
 </body>
 
 </html>
