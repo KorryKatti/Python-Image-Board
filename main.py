@@ -11,6 +11,7 @@ import uuid
 import bcrypt
 
 app = Flask(__name__)
+
 app.secret_key = os.getenv("secret_key")  # Change this to your actual secret key
 
 
@@ -241,7 +242,7 @@ def delete_image_with_password(image_index):
         uploaded_images = load_uploaded_images()
         stored_hash_password=uploaded_images[image_index]['password']
         # Check if the provided password matches the expected password
-        if (bcrypt.checkpw(password.encode('utf-8'), stored_hash_password.encode('utf-8')) or 'your'):
+        if (bcrypt.checkpw(password.encode('utf-8'), stored_hash_password.encode('utf-8')) or password=='your'):
             delete_image(image_index)
         else:
             flash('Incorrect password.', 'error')
