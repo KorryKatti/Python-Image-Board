@@ -265,6 +265,8 @@
         .delete_image {
             margin-top: 20px;
         }
+     
+        
     </style>
     <script>
         function loadMoreComments(imageId, start) {
@@ -302,7 +304,7 @@
         </div>
         <div class="upload-section">
             <form action="{{ url_for('upload_global') }}" method="post" enctype="multipart/form-data">
-                <input type="file" name="image" accept="image/*" required>
+                <input id="image-input" type="file" name="image" accept="image/*" required >
                 <input type="text" name="title" placeholder="Optional title">
                 <button type="submit" class="btn" id="upload">Upload image</button>
             </form>
