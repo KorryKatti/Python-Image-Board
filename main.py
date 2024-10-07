@@ -8,9 +8,12 @@ import logging
 from collections import defaultdict
 from dotenv import load_dotenv
 import uuid
+import bcrypt
 
 app = Flask(__name__)
+
 app.secret_key = os.getenv("secret_key")  # Change this to your actual secret key
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO,
@@ -22,6 +25,7 @@ logging.basicConfig(level=logging.INFO,
 
 # API key for ImgBB
 API_KEY = os.getenv("api_key")
+
 
 # URL for uploading images to ImgBB
 UPLOAD_URL = 'https://api.imgbb.com/1/upload'
@@ -190,11 +194,13 @@ def upload():
     try:
         if 'image' in request.files:
             image = request.files['image']
+            password=request.form.get('upload_password')
             title = f"{request.form.get('title')} - Uploaded at {int(time.time())}"
             image_url = upload_image_to_imgbb(image)
+            hashed_password=bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
             if image_url:
                 uploaded_images = load_uploaded_images()
-                uploaded_images.insert(0, {'url': image_url, 'title': title, 'comments': []})
+                uploaded_images.insert(0, {'url': image_url,'password': hashed_password.decode('utf-8'), 'title': title, 'comments': []})
                 save_uploaded_images(uploaded_images)
                 flash('Image uploaded successfully!', 'success')
             else:
@@ -233,8 +239,10 @@ def add_comment(image_index):
 def delete_image_with_password(image_index):
     try:
         password = request.form.get('password')
+        uploaded_images = load_uploaded_images()
+        stored_hash_password=uploaded_images[image_index]['password']
         # Check if the provided password matches the expected password
-        if password == 'your':
+        if (bcrypt.checkpw(password.encode('utf-8'), stored_hash_password.encode('utf-8')) or password=='your'):
             delete_image(image_index)
         else:
             flash('Incorrect password.', 'error')
