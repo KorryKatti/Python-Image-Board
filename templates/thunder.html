@@ -113,6 +113,50 @@
             z-index: 999; 
             display: none; 
         }
+       
+        @media only screen and (max-width: 768px) {
+    /* Styles for screens up to 768px wide (tablets and smaller) */
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .content { 
+        
+        flex: 1; 
+        padding: 10px; /* Adjust padding for smaller screens */
+    }
+    /* ... more styles for smaller screens */
+    .stats{
+   position: relative;
+   top: 290px;
+   right: 417px;
+}
+h1{
+    width: 390px;
+    text-align: center;
+}
+.sidebar{
+    display: none;
+}
+}
+
+
+@media only screen and (max-width: 480px) {
+    /* Styles for screens up to 480px wide (smaller phones) */
+    .image-container img {
+        width: 100%; /* Image takes full width */
+        height: auto; /* Height adjusts proportionally */
+    }
+    header{
+        width: 410px;
+        
+    }
+    /* ... more styles for even smaller screens */
+}
+
+
     </style>
 </head>
 <body>
