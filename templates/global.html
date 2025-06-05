@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Global Image Board</title>
     <style>
+        /* Styles unchanged from your clean modern aesthetic */
         body {
             font-family: Arial, sans-serif;
             background-color: #1a1a1a;
@@ -25,267 +26,173 @@
             color: white;
         }
 
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .image-item {
-            background-color: #333;
-            border-radius: 5px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        .image-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .image-info {
-            padding: 10px;
-        }
-
-        .image-info h3 {
-            margin: 0;
-            font-size: 16px;
-            color: white;
-        }
-
-        .image-info p {
-            margin: 5px 0 0;
-            font-size: 14px;
-            color: #ccc;
-        }
-
-        .warning {
-            background-color: #ffcc00;
-            color: black;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-
-        /* Popup styles */
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            z-index: 1000;
-            display: none;
+        .image-container {
+            background: #333;
             border-radius: 8px;
-            max-width: 300px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-details {
+            background-color: rgba(255, 0, 0, 0.6);
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 14px;
             text-align: center;
         }
 
-        .popup .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 999;
+        .hidden-comment {
             display: none;
         }
 
-        .upload-section {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin-bottom: 20px;
+        .image-container img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-bottom: 2px solid white;
         }
 
-        .upload-section form {
-            display: flex;
-            flex-direction: row;
-            gap: 10px;
+        .comment-section {
+            padding: 10px;
+        }
+
+        .comment-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .comment-section li {
+            background-color: #444;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            word-wrap: break-word;
         }
 
         input[type="file"],
         input[type="text"],
         input[type="password"] {
-            padding: 15px;
-            border: none;
-            outline: none;
-            background-color: #333;
-            color: #fff;
+            padding: 12px;
             border-radius: 12px;
-            width: 100%;
-            box-sizing: border-box;
+            border: none;
+            background-color: #222;
+            color: white;
             font-size: 16px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            width: 200px;
+            outline: none;
+            transition: background-color 0.3s ease;
         }
 
         input[type="file"]::file-selector-button {
-            padding: 10px;
-            border: none;
+            padding: 10px 15px;
             background-color: #444;
-            color: #fff;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease;
         }
 
         input[type="file"]:hover::file-selector-button,
-        input[type="text"]:hover {
-            background-color: #444;
-        }
-
-        input[type="text"]:focus {
+        input[type="text"]:hover,
+        input[type="password"]:hover {
             background-color: #555;
         }
 
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            background-color: #666;
+        }
+
         .btn {
-            padding: 15px 40px;
+            background-color: #e03e3e;
             border: none;
-            outline: none;
-            color: #fff;
-            cursor: pointer;
-            position: relative;
-            z-index: 1;
+            color: white;
+            padding: 12px 28px;
             border-radius: 12px;
-            transition: color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.15s ease;
+            margin-left: 10px;
         }
 
-        .btn::before {
-            content: "";
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            background-size: 600%;
-            z-index: -1;
-            width: calc(100%+4px);
-            height: calc(100%+4px);
-            filter: blur(8px);
-            transition: opacity .3s ease-in-out;
-            border-radius: 10px;
-            opacity: 1;
-        }
-
-        .btn::after {
-            content: "";
-            z-index: -1;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: #333;
-            left: 0;
-            top: 0;
-            border-radius: 10px;
-        }
-
-        .btn:hover::before {
-            opacity: 1;
-        }
-
-        .btn:active::after {
-            background: transparent;
+        .btn:hover {
+            background-color: #bf2f2f;
+            transform: scale(1.05);
         }
 
         .btn:active {
-            color: #000;
-            font-weight: bold;
             transform: scale(0.95);
         }
 
-        #global-comment-btn {
-            margin-top: 15px;
-        }
-
-        #delete_btn {
-            margin-top: 15px;
-            background-color: red;
-        }
-
-        .image-container {
+        .warning {
+            background-color: #ffcc00;
+            color: black;
+            padding: 15px;
+            border-radius: 6px;
             margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border: 2px solid white;
-        }
-
-        .image-details {
-            position: relative;
-            background-color: rgba(255, 0, 0, 0.5);
-            color: white;
-            font-size: 12px;
             font-weight: bold;
             text-align: center;
-            padding: 5px 0;
-            width: 100%;
-            top: 0;
         }
 
-        .stats {
-            flex: 1;
-            padding-left: 20px;
+        .upload-section {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
-        .comment-section {
-            margin-top: 20px;
+        form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-
-        .comment-section ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .comment-section ul li {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #444;
-            border-radius: 5px;
-        }
-
-        .delete_image {
-            margin-top: 20px;
-        }
+                 .image-card img {
+    max-width: 200px;   /* thumbnail size */
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+    border: 1px solid #45a29e;
+  }
+  .image-card img.image-zoomed {
+    max-width: 90vw;  /* big AF but keeps some margin */
+    max-height: 90vh;
+    position: relative;
+    z-index: 10;
+    border-radius: 8px;
+    box-shadow: 0 0 20px #45a29e;
+  }
     </style>
+
     <script>
-        function loadMoreComments(imageId, start) {
-            fetch(`/get_comments/${imageId}?start=${start}`)
-                .then(response => response.json())
-                .then(data => {
-                    const commentsContainer = document.getElementById(`comments-${imageId}`);
-                    data.comments.forEach(comment => {
-                        const commentElement = document.createElement('li');
-                        commentElement.textContent = comment.text;
-                        commentsContainer.appendChild(commentElement);
-                    });
-                    if (data.has_more) {
-                        const readMoreButton = document.getElementById(`read-more-${imageId}`);
-                        readMoreButton.setAttribute('onclick', `loadMoreComments('${imageId}', ${start + 5})`);
-                    } else {
-                        const readMoreButton = document.getElementById(`read-more-${imageId}`);
-                        readMoreButton.style.display = 'none';
-                    }
-                })
-                .catch(error => console.error('Error fetching comments:', error));
+        // fetch comments with pagination per image
+        async function loadMoreComments(imageId, start) {
+            try {
+                const res = await fetch(`/get_comments/${imageId}?start=${start}`);
+                if (!res.ok) throw new Error("Network response not ok");
+                const data = await res.json();
+
+                const commentsContainer = document.getElementById(`comments-${imageId}`);
+                data.comments.forEach(({ text }) => {
+                    const li = document.createElement("li");
+                    li.textContent = text;
+                    commentsContainer.appendChild(li);
+                });
+
+                if (data.has_more) {
+                    const readMoreBtn = document.getElementById(`read-more-${imageId}`);
+                    readMoreBtn.onclick = () => loadMoreComments(imageId, start + 5);
+                } else {
+                    const readMoreBtn = document.getElementById(`read-more-${imageId}`);
+                    if (readMoreBtn) readMoreBtn.style.display = "none";
+                }
+            } catch (e) {
+                console.error("Failed loading comments:", e);
+            }
         }
     </script>
 </head>
@@ -294,52 +201,80 @@
     {% include 'header.html' %}
 
     <div class="container">
-        <h1>Global Image Board</h1>
+        <h1>{{ board_name|capitalize }} Image Board</h1>
 
         <div class="warning">
-            <strong>Warning:</strong> The images are occasionally cleared, sometimes automatically. Do not use this as
-            an image storage platform. Also, refrain from posting NSFW images.
+            Warning: Images get cleared sometimes. Not a storage service. No NSFW, keep it clean.
         </div>
+
         <div class="upload-section">
-            <form action="{{ url_for('upload_global') }}" method="post" enctype="multipart/form-data">
-                <input type="file" name="image" accept="image/*" required>
-                <input type="text" name="title" placeholder="Optional title">
-                <button type="submit" class="btn" id="upload">Upload image</button>
+            <form action="{{ url_for('upload', board_name=board_name) }}" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="file" name="image" accept="image/*" required />
+                <input type="text" name="caption" placeholder="Optional caption" autocomplete="off" />
+                <button type="submit" class="btn">Upload</button>
             </form>
         </div>
 
         <div class="image-section">
             {% for image in images %}
-            <div class="image-container">
-                <div class="image-details">{{ image.title }}</div>
-                <img src="{{ image.url }}" alt="Uploaded Image" height="650" width="650">
-                <div class="delete_image">
-                    <form action="{{ url_for('delete_global_image_with_password', image_index=loop.index0) }}" method="post">
-                        <input type="password" name="password" placeholder="Enter password">
-                        <button type="submit" class="btn" id="delete_btn">Delete</button>
+            <div class="image-card">
+        <img src="{{ image.image_url }}" alt="uploaded image" loading="lazy" />
+        <div class="caption">{{ image.caption_of_image }}</div>
+
+                <div class="delete_image" style="padding:10px; text-align:center;">
+                    <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="post" autocomplete="off">
+                        <input type="password" name="password" placeholder="Password" required />
+                        <button type="submit" class="btn" style="background-color:#b22222;">Delete</button>
                     </form>
                 </div>
+
                 <div class="comment-section">
                     <h3>Comments</h3>
-                    <form action="{{ url_for('add_global_comment', image_id=image.id) }}" method="post">
-                        <input type="text" name="comment" placeholder="Add a comment">
-                        <button type="submit" class="btn" id="global-comment-btn">Post</button>
+                    <form action="{{ url_for('comment', image_id=image.image_id) }}" method="post" autocomplete="off">
+                        <input type="text" name="comment" placeholder="Add a comment" required />
+                        <button type="submit" class="btn">Post</button>
                     </form>
-                    <ul id="comments-{{ image.id }}">
-                        {% for comment in image.comments[:3] %}
-                        <li>{{ comment.text }}</li>
+                    <ul id="comments-{{ image.image_id }}">
+                        {% set image_comments = comments | selectattr('image_id', 'equalto', image.image_id) | list %}
+                        {% for comment in image_comments %}
+                        <li class="{{ 'hidden-comment' if loop.index > 5 else '' }}">{{ comment.comment }}</li>
                         {% endfor %}
+                        {% if image_comments|length == 0 %}
+                        <li>No comments yet.</li>
+                        {% endif %}
                     </ul>
-                    {% if image.comments|length > 3 %}
-                    <button id="read-more-{{ image.id }}" onclick="loadMoreComments('{{ image.id }}', 3)" class="btn">Read more</button>
+                    {% if image_comments|length > 5 %}
+                    <button class="btn" id="read-more-{{ image.image_id }}">Show More</button>
                     {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
-
-    <div id="overlay" class="overlay"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[id^="read-more-"]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const imageId = btn.id.replace('read-more-', '');
+                    const ul = document.getElementById(`comments-${imageId}`);
+                    ul.querySelectorAll('.hidden-comment').forEach(li => {
+                        li.classList.remove('hidden-comment');
+                    });
+                    btn.style.display = 'none';
+                });
+            });
+        });
+    </script>
+        <script>
+  document.querySelectorAll('.image-card img').forEach(img => {
+    img.addEventListener('click', () => {
+      img.classList.toggle('image-zoomed');
+      if(img.classList.contains('image-zoomed')) {
+        window.scrollTo({ top: img.offsetTop - 50, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
 </body>
 
 </html>

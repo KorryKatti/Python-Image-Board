@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Image Board - Brutalist Edition</title>
+  <style>
+    /* brutalist af - no mercy */
+    body {
+      background: #fff;
+      color: #000;
+      font-family: monospace, monospace;
+      margin: 0;
+      padding: 0;
+      line-height: 1.2;
+      user-select: none; /* annoying */
+    }
+
+    .container {
+      width: 100%;
+      max-width: none;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: left;
+      padding: 5px 10px;
+      background: lime;
+      color: black;
+      border-bottom: 5px solid red;
+      margin: 0;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .warning {
+      background: yellow;
+      color: black;
+      font-weight: bold;
+      padding: 15px;
+      border: 3px dashed black;
+      margin: 10px 5px;
+    }
+
+    .upload-section {
+      border: 4px double black;
+      padding: 10px;
+      margin: 10px 5px;
+      background: #eee;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    form {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="password"] {
+      background: #fff;
+      border: 2px solid black;
+      padding: 4px 6px;
+      font-size: 12px;
+      color: #000;
+      flex: 1 0 150px;
+      margin: 0;
+      outline: none;
+      box-shadow: none;
+    }
+
+    input[type="file"]::file-selector-button {
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 2px 4px;
+    }
+
+    button.btn {
+      background: black;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      font-weight: 900;
+      cursor: pointer;
+      flex: 0 0 auto;
+      margin: 0;
+      transition: none;
+    }
+
+    button.btn:active {
+      background: red;
+    }
+
+    .image-section {
+      margin: 5px;
+      padding: 0;
+    }
+
+    .image-card {
+      border: 3px solid black;
+      margin: 8px 5px;
+      padding: 5px;
+      background: #fff;
+      max-width: 220px;
+      float: left;
+      word-break: break-word;
+      position: relative;
+    }
+
+    .image-card img {
+      width: 200px;
+      height: auto;
+      border: 2px solid red;
+      cursor: pointer;
+      display: block;
+      margin-bottom: 3px;
+      image-rendering: pixelated; /* brutal */
+      transition: none !important;
+    }
+
+    .image-card img.image-zoomed {
+      position: fixed;
+      top: 5vh;
+      left: 5vw;
+      width: 90vw !important;
+      height: auto !important;
+      border: 5px solid black;
+      background: white;
+      z-index: 9999;
+      box-shadow: none;
+      cursor: zoom-out;
+      image-rendering: auto;
+    }
+
+    .caption {
+      font-size: 10px;
+      font-weight: bold;
+      text-align: center;
+      padding: 2px 0;
+      border-top: 1px solid black;
+    }
+
+    .delete_image {
+      background: black;
+      padding: 4px;
+      margin-top: 5px;
+      font-size: 10px;
+      border-top: 2px solid red;
+      color: lime;
+      text-align: center;
+    }
+
+    .delete_image form {
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .comment-section {
+      margin-top: 8px;
+      background: white;
+      border: 2px solid black;
+      padding: 3px;
+      font-size: 12px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .comment-section h3 {
+      margin: 0 0 5px 0;
+      padding: 0;
+      font-weight: 900;
+      background: red;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+      border-bottom: 2px solid black;
+    }
+
+    .comment-section form {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 4px;
+    }
+
+    .comment-section input[type="text"] {
+      flex-grow: 1;
+      font-size: 10px;
+      border: 1px solid black;
+      padding: 3px 5px;
+      background: #eee;
+      color: #000;
+    }
+
+    .comment-section button.btn {
+      flex: 0 0 auto;
+      padding: 4px 10px;
+      font-size: 10px;
+      background: red;
+      border: 1px solid black;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 15px;
+      list-style: square;
+      max-height: 80px;
+      overflow-y: auto;
+      border-top: 1px solid black;
+    }
+
+    li {
+      background: #f9f9f9;
+      margin-bottom: 2px;
+      padding: 2px 5px;
+      border: 1px solid black;
+      font-size: 11px;
+      line-height: 1.1;
+    }
+
+    .hidden-comment {
+      display: none;
+    }
+
+    #read-more {
+      background: lime;
+      border: 2px solid black;
+      color: black;
+      font-weight: 900;
+      padding: 4px;
+      cursor: pointer;
+      margin-top: 3px;
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      user-select: none;
+    }
+
+    /* clearfix cuz floats are here */
+    .image-section::after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+  </style>
+
+  <script>
+    // NO fancy smooth animations, just brutal toggle
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".image-card img").forEach(img => {
+        img.addEventListener("click", () => {
+          if (img.classList.contains("image-zoomed")) {
+            img.classList.remove("image-zoomed");
+          } else {
+            document.querySelectorAll(".image-card img.image-zoomed").forEach(i => i.classList.remove("image-zoomed"));
+            img.classList.add("image-zoomed");
+          }
+        });
+      });
+
+      // read more brutal toggle
+      document.querySelectorAll("[id^='read-more-']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const imageId = btn.id.replace("read-more-", "");
+          const ul = document.getElementById(`comments-${imageId}`);
+          ul.querySelectorAll(".hidden-comment").forEach(li => (li.style.display = "list-item"));
+          btn.style.display = "none";
+        });
+      });
+    });
+  </script>
+</head>
+
+<body>
+  {% include 'header.html' %}
+
+  <h1>{{ board_name|upper }} IMAGE BOARD</h1>
+
+  <div class="warning">
+    WARNING: IMAGES CLEARED RANDOMLY. NO NSFW. KEEP IT CLEAN. NO EXCUSES. THIS IS A GENERATED BOARD ( IT MEANS LLM TOTALLY MADE IT NO OPINIONS WERE GIVEN TO ITS DESIGN UNLIKE NON GENERATED BOARDS IN WHICH HUMAN INPUT IS PROVIDED )
+  </div>
+
+  <div class="upload-section">
+    <form action="{{ url_for('upload', board_name=board_name) }}" method="post" enctype="multipart/form-data" autocomplete="off" novalidate>
+      <input type="file" name="image" accept="image/*" required />
+      <input type="text" name="caption" placeholder="caption if you want (lol)" autocomplete="off" />
+      <button type="submit" class="btn">UPLOAD</button>
+    </form>
+  </div>
+
+  <div class="image-section">
+    {% for image in images %}
+    <div class="image-card">
+      <img src="{{ image.image_url }}" alt="uploaded image" loading="lazy" />
+      <div class="caption">{{ image.caption_of_image or 'no caption' }}</div>
+
+      <div class="delete_image">
+        <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="post" autocomplete="off" novalidate>
+          <input type="password" name="password" placeholder="password to kill this" required />
+          <button type="submit" class="btn">DEL</button>
+        </form>
+      </div>
+
+      <div class="comment-section">
+        <h3>COMMENTS</h3>
+        <form action="{{ url_for('comment', image_id=image.image_id) }}" method="post" autocomplete="off" novalidate>
+          <input type="text" name="comment" placeholder="write comment here" required />
+          <button type="submit" class="btn">POST</button>
+        </form>
+        <ul id="comments-{{ image.image_id }}">
+          {% set image_comments = comments | selectattr('image_id', 'equalto', image.image_id) | list %}
+          {% for comment in image_comments %}
+          <li class="{{ 'hidden-comment' if loop.index > 5 else '' }}">{{ comment.comment }}</li>
+          {% endfor %}
+          {% if image_comments|length == 0 %}
+          <li>no comments yet.</li>
+          {% endif %}
+        </ul>
+        {% if image_comments|length > 5 %}
+        <button class="btn" id="read-more-{{ image.image_id }}">show more</button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</body>
+
+</html>

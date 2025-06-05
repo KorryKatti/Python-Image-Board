@@ -5,3 +5,4 @@ key.py
 .env
 app.log
 global_images.json
+images.db

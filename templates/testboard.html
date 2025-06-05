@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>{{ board_name | capitalize }} Board</title>
+    <style>
+        body {
+            font-family: "Lucida Console", Monaco, monospace;
+            background: #0b0c10;
+            color: #c5c6c7;
+            margin: 0;
+            padding: 1rem 2rem;
+            user-select: none;
+        }
+        h1 {
+            color: #66fcf1;
+            border-bottom: 2px solid #45a29e;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            user-select: text;
+        }
+        .image-card {
+            background: #1f2833;
+            padding: 0.7rem 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #45a29e;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 2px 2px 5px #000a;
+        }
+        .image-card img {
+            max-width: 100%;
+            border: 1px solid #45a29e;
+            border-radius: 4px;
+            margin-bottom: 0.3rem;
+            display: block;
+            user-select: none;
+        }
+        .caption {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #66fcf1;
+            margin-bottom: 0.7rem;
+            user-select: text;
+        }
+        form.comment-form, form.delete-form {
+            margin-top: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        form.comment-form input[type="text"],
+        form.delete-form input[type="password"] {
+            flex-grow: 1;
+            background: #0b0c10;
+            border: 1px solid #45a29e;
+            padding: 0.4rem 0.5rem;
+            color: #c5c6c7;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        form.comment-form button,
+        form.delete-form button {
+            background: #45a29e;
+            border: none;
+            color: #0b0c10;
+            padding: 0.4rem 1rem;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.25s ease;
+        }
+        form.comment-form button:hover,
+        form.delete-form button:hover {
+            background: #66fcf1;
+        }
+        .comments {
+            margin-top: 1rem;
+            border-left: 3px solid #45a29e;
+            padding-left: 1rem;
+            font-size: 0.85rem;
+            color: #c5c6c7;
+            max-height: 150px;
+            overflow-y: auto;
+            user-select: text;
+        }
+        .comments p {
+            margin: 0.2rem 0;
+            white-space: pre-wrap;
+        }
+        .timestamp {
+            color: #45a29e;
+            font-size: 0.75rem;
+            margin-right: 0.3rem;
+            user-select: text;
+        }
+          .image-card img {
+    max-width: 200px;   /* thumbnail size */
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border-radius: 4px;
+    border: 1px solid #45a29e;
+  }
+  .image-card img.image-zoomed {
+    max-width: 90vw;  /* big AF but keeps some margin */
+    max-height: 90vh;
+    position: relative;
+    z-index: 10;
+    border-radius: 8px;
+    box-shadow: 0 0 20px #45a29e;
+  }
+    </style>
+</head>
+<body>
+    <h1>{{ board_name | capitalize }} Board</h1>
+
+    <h2>Upload a New Image</h2>
+    <form action="{{ url_for('upload', board_name=board_name) }}" method="POST" enctype="multipart/form-data" style="margin-bottom:2rem;">
+        <input type="file" name="image" required>
+        <input type="text" name="caption" placeholder="Caption (optional)">
+        <button type="submit">Upload</button>
+    </form>
+
+    <hr>
+
+    {% for image in images %}
+    <div class="image-card">
+        <img src="{{ image.image_url }}" alt="uploaded image" loading="lazy" />
+        <div class="caption">{{ image.caption_of_image }}</div>
+
+        <form action="{{ url_for('comment', image_id=image.image_id) }}" method="POST" class="comment-form" autocomplete="off">
+            <input type="text" name="comment" placeholder="Add a comment..." required maxlength="300" />
+            <button type="submit">Post</button>
+        </form>
+
+        <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="POST" class="delete-form" autocomplete="off" onsubmit="return confirm('Delete this image?');">
+            <input type="password" name="password" placeholder="Delete password" required minlength="4" maxlength="50" />
+            <button type="submit">Delete</button>
+        </form>
+
+        <div class="comments">
+            {% for comment in comments %}
+                {% if comment.image_id == image.image_id %}
+                    <p><span class="timestamp">[{{ comment.comment_timestamp }}]</span> {{ comment.comment }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <script>
+  document.querySelectorAll('.image-card img').forEach(img => {
+    img.addEventListener('click', () => {
+      img.classList.toggle('image-zoomed');
+      if(img.classList.contains('image-zoomed')) {
+        window.scrollTo({ top: img.offsetTop - 50, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+</body>
+</html>
