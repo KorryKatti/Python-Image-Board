@@ -12,7 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("secret_key", "default_secret")
 API_KEY = os.getenv("api_key")
-UPLOAD_URL = 'https://api.imgbb.com/1/upload'
+UPLOAD_IMAGE_URL = 'https://api.imgbb.com/1/upload'
 
 from datetime import datetime
 
@@ -109,7 +109,7 @@ def upload(board_name):
             files = {'image': image}
             params = {'key': API_KEY}
 
-            response = requests.post(UPLOAD_URL, files=files, params=params)
+            response = requests.post(UPLOAD_IMAGE_URL, files=files, params=params)
             response.raise_for_status()
             data = response.json()
 
@@ -242,9 +242,11 @@ def delete_image(image_id):
         conn.close()
 
 
+from flask import send_from_directory
+
 @app.route('/favicon.ico')
 def favicon():
-    return '', 204  # or use send_from_directory to serve one
+    return send_from_directory('static', 'icon.png')
 
 
 if __name__ == '__main__':

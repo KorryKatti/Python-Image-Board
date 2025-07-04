@@ -1,280 +1,443 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Global Image Board</title>
-    <style>
-        /* Styles unchanged from your clean modern aesthetic */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-        }
-
-        .image-container {
-            background: #333;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            overflow: hidden;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        .image-details {
-            background-color: rgba(255, 0, 0, 0.6);
-            padding: 6px 10px;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .hidden-comment {
-            display: none;
-        }
-
-        .image-container img {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            border-bottom: 2px solid white;
-        }
-
-        .comment-section {
-            padding: 10px;
-        }
-
-        .comment-section ul {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0;
-        }
-
-        .comment-section li {
-            background-color: #444;
-            margin-bottom: 8px;
-            padding: 10px;
-            border-radius: 5px;
-            word-wrap: break-word;
-        }
-
-        input[type="file"],
-        input[type="text"],
-        input[type="password"] {
-            padding: 12px;
-            border-radius: 12px;
-            border: none;
-            background-color: #222;
-            color: white;
-            font-size: 16px;
-            width: 200px;
-            outline: none;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="file"]::file-selector-button {
-            padding: 10px 15px;
-            background-color: #444;
-            border-radius: 12px;
-            cursor: pointer;
-            color: white;
-            border: none;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="file"]:hover::file-selector-button,
-        input[type="text"]:hover,
-        input[type="password"]:hover {
-            background-color: #555;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            background-color: #666;
-        }
-
-        .btn {
-            background-color: #e03e3e;
-            border: none;
-            color: white;
-            padding: 12px 28px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.15s ease;
-            margin-left: 10px;
-        }
-
-        .btn:hover {
-            background-color: #bf2f2f;
-            transform: scale(1.05);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .warning {
-            background-color: #ffcc00;
-            color: black;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .upload-section {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        form {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-                 .image-card img {
-    max-width: 200px;   /* thumbnail size */
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    border-radius: 4px;
-    border: 1px solid #45a29e;
-  }
-  .image-card img.image-zoomed {
-    max-width: 90vw;  /* big AF but keeps some margin */
-    max-height: 90vh;
-    position: relative;
-    z-index: 10;
-    border-radius: 8px;
-    box-shadow: 0 0 20px #45a29e;
-  }
-    </style>
-
-    <script>
-        // fetch comments with pagination per image
-        async function loadMoreComments(imageId, start) {
-            try {
-                const res = await fetch(`/get_comments/${imageId}?start=${start}`);
-                if (!res.ok) throw new Error("Network response not ok");
-                const data = await res.json();
-
-                const commentsContainer = document.getElementById(`comments-${imageId}`);
-                data.comments.forEach(({ text }) => {
-                    const li = document.createElement("li");
-                    li.textContent = text;
-                    commentsContainer.appendChild(li);
-                });
-
-                if (data.has_more) {
-                    const readMoreBtn = document.getElementById(`read-more-${imageId}`);
-                    readMoreBtn.onclick = () => loadMoreComments(imageId, start + 5);
-                } else {
-                    const readMoreBtn = document.getElementById(`read-more-${imageId}`);
-                    if (readMoreBtn) readMoreBtn.style.display = "none";
-                }
-            } catch (e) {
-                console.error("Failed loading comments:", e);
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Board - Python Image Board</title>
+  <style>
+    * { box-sizing: border-box; }
+    
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: #eef2ff;
+      color: #000;
+      margin: 0;
+      padding: 0;
+      line-height: 1.3;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      color: #af0a0f;
+      font-size: 28px;
+      margin: 5px 0;
+      font-weight: bold;
+    }
+    
+    .header .subtitle {
+      color: #89a;
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+    
+    .rules {
+      background: #d5daf0;
+      border: 1px solid #b7c5d9;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 11px;
+      color: #34345c;
+    }
+    
+    .upload-form {
+      background: #e5e9f0;
+      border: 1px solid #b7c5d9;
+      padding: 10px;
+      margin: 15px 0;
+    }
+    
+    .upload-form table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .upload-form td {
+      padding: 2px 5px;
+      font-size: 11px;
+      color: #34345c;
+    }
+    
+    .upload-form input[type="file"],
+    .upload-form input[type="text"],
+    .upload-form input[type="password"] {
+      border: 1px solid #aaa;
+      padding: 2px 4px;
+      font-size: 11px;
+      background: #fff;
+    }
+    
+    .upload-form input[type="submit"] {
+      background: #f0e0d6;
+      border: 1px solid #d9bfb7;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    
+    .upload-form input[type="submit"]:hover {
+      background: #e0d0c4;
+    }
+    
+    .post {
+      margin: 15px 0;
+      background: #f0e0d6;
+      border: 1px solid #d9bfb7;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .post-header {
+      background: #e5e9f0;
+      padding: 5px 8px;
+      font-size: 11px;
+      color: #34345c;
+      border-bottom: 1px solid #d9bfb7;
+    }
+    
+    .post-content {
+      padding: 8px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .post img {
+      max-width: 125px;
+      max-height: 125px;
+      border: 1px solid #b7c5d9;
+      cursor: pointer;
+      transition: none;
+    }
+    
+    .post img.expanded {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 90vw;
+      max-height: 90vh;
+      z-index: 1000;
+      background: #fff;
+      border: 2px solid #000;
+      cursor: zoom-out;
+    }
+    
+    .post-text {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    
+    .post-caption {
+      font-weight: bold;
+      color: #0f0c5d;
+      margin-bottom: 5px;
+    }
+    
+    .post-actions {
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    
+    .post-actions form {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    
+    .post-actions input[type="password"] {
+      width: 80px;
+      border: 1px solid #aaa;
+      padding: 1px 3px;
+      font-size: 11px;
+    }
+    
+    .post-actions input[type="submit"] {
+      background: #f0e0d6;
+      border: 1px solid #d9bfb7;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    
+    .comments {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #d9bfb7;
+    }
+    
+    .comments h4 {
+      margin: 0 0 5px 0;
+      font-size: 12px;
+      color: #0f0c5d;
+    }
+    
+    .comment-form {
+      margin-bottom: 8px;
+    }
+    
+    .comment-form input[type="text"] {
+      width: 200px;
+      border: 1px solid #aaa;
+      padding: 2px 4px;
+      font-size: 11px;
+      margin-right: 5px;
+    }
+    
+    .comment-form input[type="submit"] {
+      background: #f0e0d6;
+      border: 1px solid #d9bfb7;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    
+    .comment-list {
+      font-size: 11px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    
+    .comment-list li {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      margin-bottom: 2px;
+      padding: 3px 5px;
+      border-radius: 1px;
+    }
+    
+    .comment-list li.hidden {
+      display: none;
+    }
+    
+    .show-more {
+      background: #e5e9f0;
+      border: 1px solid #b7c5d9;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      display: none;
+    }
+    
+    @media (max-width: 600px) {
+      .post-content {
+        flex-direction: column;
+      }
+      
+      .post img {
+        max-width: 100%;
+        align-self: center;
+      }
+    }
+  </style>
 </head>
-
 <body>
-    {% include 'header.html' %}
+  {% include 'header.html' %}
 
-    <div class="container">
-        <h1>{{ board_name|capitalize }} Image Board</h1>
-
-        <div class="warning">
-            Warning: Images get cleared sometimes. Not a storage service. No NSFW, keep it clean.
-        </div>
-
-        <div class="upload-section">
-            <form action="{{ url_for('upload', board_name=board_name) }}" method="post" enctype="multipart/form-data" autocomplete="off">
-                <input type="file" name="image" accept="image/*" required />
-                <input type="text" name="caption" placeholder="Optional caption" autocomplete="off" />
-                <button type="submit" class="btn">Upload</button>
-            </form>
-        </div>
-
-        <div class="image-section">
-            {% for image in images %}
-            <div class="image-card">
-        <img src="{{ image.image_url }}" alt="uploaded image" loading="lazy" />
-        <div class="caption">{{ image.caption_of_image }}</div>
-
-                <div class="delete_image" style="padding:10px; text-align:center;">
-                    <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="post" autocomplete="off">
-                        <input type="password" name="password" placeholder="Password" required />
-                        <button type="submit" class="btn" style="background-color:#b22222;">Delete</button>
-                    </form>
-                </div>
-
-                <div class="comment-section">
-                    <h3>Comments</h3>
-                    <form action="{{ url_for('comment', image_id=image.image_id) }}" method="post" autocomplete="off">
-                        <input type="text" name="comment" placeholder="Add a comment" required />
-                        <button type="submit" class="btn">Post</button>
-                    </form>
-                    <ul id="comments-{{ image.image_id }}">
-                        {% set image_comments = comments | selectattr('image_id', 'equalto', image.image_id) | list %}
-                        {% for comment in image_comments %}
-                        <li class="{{ 'hidden-comment' if loop.index > 5 else '' }}">{{ comment.comment }}</li>
-                        {% endfor %}
-                        {% if image_comments|length == 0 %}
-                        <li>No comments yet.</li>
-                        {% endif %}
-                    </ul>
-                    {% if image_comments|length > 5 %}
-                    <button class="btn" id="read-more-{{ image.image_id }}">Show More</button>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>Global Board</h1>
+      <div class="subtitle">Anonymous Image Board</div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[id^="read-more-"]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const imageId = btn.id.replace('read-more-', '');
-                    const ul = document.getElementById(`comments-${imageId}`);
-                    ul.querySelectorAll('.hidden-comment').forEach(li => {
-                        li.classList.remove('hidden-comment');
-                    });
-                    btn.style.display = 'none';
-                });
-            });
+
+    <div class="rules">
+      <strong>Rules:</strong> Keep it clean. No NSFW content. Images may be deleted without notice. Anonymous posting only.
+    </div>
+
+    <div class="upload-form">
+      <form action="{{ url_for('upload', board_name=board_name) }}" method="post" enctype="multipart/form-data">
+        <table>
+          <tr>
+            <td><strong>File:</strong></td>
+            <td><input type="file" name="image" accept="image/*" required></td>
+          </tr>
+          <tr>
+            <td><strong>Caption:</strong></td>
+            <td><input type="text" name="caption" placeholder="Optional caption" maxlength="200"></td>
+          </tr>
+          <tr>
+            <td><strong>Captcha:</strong></td>
+            <td>
+              <span id="captcha-question"></span>
+              <input type="text" name="captcha" placeholder="Answer" required style="width: 60px; margin-left: 10px;">
+              <input type="hidden" name="captcha_answer" id="captcha-answer">
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td><input type="submit" value="Post Image"></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+
+    <div class="posts">
+      {% for image in images %}
+      <div class="post">
+        <div class="post-header">
+          Anonymous {{ loop.index }}
+        </div>
+        <div class="post-content">
+          <img src="{{ image.image_url }}" alt="Post image" onclick="toggleExpand(this)">
+          <div class="post-text">
+            {% if image.caption_of_image %}
+            <div class="post-caption">{{ image.caption_of_image }}</div>
+            {% endif %}
+            
+            <div class="post-actions">
+              <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="post" style="display: inline;">
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="submit" value="Delete">
+              </form>
+            </div>
+            
+            <div class="comments">
+              <h4>Comments</h4>
+              <div class="comment-form">
+                <form action="{{ url_for('comment', image_id=image.image_id) }}" method="post">
+                  <input type="text" name="comment" placeholder="Add comment..." required>
+                  <input type="submit" value="Post">
+                </form>
+              </div>
+              
+              <ul class="comment-list" id="comments-{{ image.image_id }}">
+                {% set image_comments = comments | selectattr('image_id', 'equalto', image.image_id) | list %}
+                {% for comment in image_comments %}
+                <li class="{{ 'hidden' if loop.index > 5 else '' }}">{{ comment.comment }}</li>
+                {% endfor %}
+                {% if image_comments|length == 0 %}
+                <li style="color: #999;">No comments yet.</li>
+                {% endif %}
+              </ul>
+              
+              {% if image_comments|length > 5 %}
+              <button class="show-more" onclick="showMoreComments('{{ image.image_id }}')">
+                Show {{ image_comments|length - 5 }} more comments
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <footer style="background: #e5e9f0; border-top: 1px solid #b7c5d9; padding: 10px; text-align: center; margin-top: 30px; font-size: 11px; color: #34345c;">
+    <a href="https://korrykatti.github.io" style="color: #0f0c5d; text-decoration: none; margin: 0 10px;">My Website</a>
+    <span style="margin: 0 5px;">|</span>
+    <a href="https://korrykatti.is-a.dev/project_sites/mirage/index.html" style="color: #0f0c5d; text-decoration: none; margin: 0 10px;">Mirage</a>
+  </footer>
+
+  <div class="overlay" id="overlay" onclick="closeExpanded()"></div>
+
+  <script>
+    // Generate random math captcha
+    function generateCaptcha() {
+      const num1 = Math.floor(Math.random() * 20) + 1;
+      const num2 = Math.floor(Math.random() * 20) + 1;
+      const operations = ['+', '-', '*'];
+      const operation = operations[Math.floor(Math.random() * operations.length)];
+      
+      let answer;
+      let question;
+      
+      switch(operation) {
+        case '+':
+          answer = num1 + num2;
+          question = `${num1} + ${num2} = ?`;
+          break;
+        case '-':
+          // Ensure positive result
+          const larger = Math.max(num1, num2);
+          const smaller = Math.min(num1, num2);
+          answer = larger - smaller;
+          question = `${larger} - ${smaller} = ?`;
+          break;
+        case '*':
+          // Use smaller numbers for multiplication
+          const a = Math.floor(Math.random() * 10) + 1;
+          const b = Math.floor(Math.random() * 10) + 1;
+          answer = a * b;
+          question = `${a} × ${b} = ?`;
+          break;
+      }
+      
+      document.getElementById('captcha-question').textContent = question;
+      document.getElementById('captcha-answer').value = answer;
+    }
+
+    // Initialize captcha on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      generateCaptcha();
+    });
+
+    function toggleExpand(img) {
+      const overlay = document.getElementById('overlay');
+      
+      if (img.classList.contains('expanded')) {
+        img.classList.remove('expanded');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      } else {
+        // Close any other expanded images
+        document.querySelectorAll('img.expanded').forEach(i => {
+          i.classList.remove('expanded');
         });
-    </script>
-        <script>
-  document.querySelectorAll('.image-card img').forEach(img => {
-    img.addEventListener('click', () => {
-      img.classList.toggle('image-zoomed');
-      if(img.classList.contains('image-zoomed')) {
-        window.scrollTo({ top: img.offsetTop - 50, behavior: 'smooth' });
+        
+        img.classList.add('expanded');
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeExpanded() {
+      document.querySelectorAll('img.expanded').forEach(img => {
+        img.classList.remove('expanded');
+      });
+      document.getElementById('overlay').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    function showMoreComments(imageId) {
+      const commentList = document.getElementById(`comments-${imageId}`);
+      const hiddenComments = commentList.querySelectorAll('.hidden');
+      const showMoreBtn = event.target;
+      
+      hiddenComments.forEach(comment => {
+        comment.classList.remove('hidden');
+      });
+      
+      showMoreBtn.style.display = 'none';
+    }
+
+    // Close expanded image with ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeExpanded();
       }
     });
-  });
-</script>
+  </script>
 </body>
-
 </html>
