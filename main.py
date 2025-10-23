@@ -62,6 +62,17 @@ def init_db():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS text_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp INTEGER NOT NULL,
+            board_name TEXT NOT NULL,
+            post_id TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -219,6 +230,80 @@ def latest_updates():
 @app.route('/rules')
 def rules():
     return render_template('rules.html')
+
+
+@app.route('/text-board')
+def text_board():
+    conn = sqlite3.connect('images.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT title, content, timestamp, post_id
+        FROM text_posts
+        ORDER BY timestamp DESC
+    ''')
+    posts = cursor.fetchall()
+    conn.close()
+
+    posts_data = [
+        {'title': post[0], 'content': post[1], 'timestamp': post[2], 'post_id': post[3]}
+        for post in posts
+    ]
+
+    return render_template('text-board.html', posts=posts_data)
+
+
+@app.route('/create-text-post', methods=['POST'])
+def create_text_post():
+    title = request.form.get('title')
+    content = request.form.get('content')
+
+    if not title or not content:
+        flash('Title and content are required', 'error')
+        return redirect(url_for('text_board'))
+
+    if len(content.split()) > 1234:
+        flash('Post content cannot exceed 1234 words', 'error')
+        return redirect(url_for('text_board'))
+
+    timestamp = int(time.time())
+    post_id = str(uuid.uuid4())
+    board_name = 'text-board'
+
+    conn = sqlite3.connect('images.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO text_posts (timestamp, board_name, post_id, title, content)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (timestamp, board_name, post_id, title, content))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('text_board'))
+
+
+@app.route('/api/post/<post_id>')
+def get_post(post_id):
+    conn = sqlite3.connect('images.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT title, content, timestamp
+        FROM text_posts
+        WHERE post_id = ?
+    ''', (post_id,))
+    post = cursor.fetchone()
+    conn.close()
+
+    if post:
+        post_data = {
+            'title': post[0],
+            'content': post[1],
+            'timestamp': post[2]
+        }
+        return jsonify(post_data)
+    else:
+        return jsonify({'error': 'Post not found'}), 404
 
 
 @app.route('/delete/<image_id>', methods=['POST'])

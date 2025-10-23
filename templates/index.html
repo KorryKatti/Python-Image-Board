@@ -30,14 +30,17 @@
         .topics-links-container {
             max-width: 600px;
             margin: 20px auto;
-            background-color: #373737;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .topic-row {
             display: flex;
-            border-bottom: 1px solid #7d7d7d;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         .topic-row:last-child {
             border-bottom: none;
@@ -48,7 +51,7 @@
         }
         .topic {
             flex-basis: 30%;
-            background-color: #292929;
+            background: rgba(0, 0, 0, 0.2);
             font-weight: bold;
         }
         .links {
@@ -81,13 +84,15 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             color: white;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
             display: none;
-            border-radius: 8px;
+            border-radius: 15px;
             max-width: 300px;
             text-align: center;
         }
@@ -128,6 +133,7 @@
                 <div class="links">
                     <a href="/thunder">Thunder</a>
                     <a href="/global">Global</a>
+                    <a href="/text-board">Text Board</a>
                     <!-- <a href="/testboard">Test Board</a> -->
                 </div>
             </div>

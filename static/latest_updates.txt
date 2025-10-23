@@ -1,1 +1,1 @@
--- changed the whole codebase to a more uniform code for all to make readability even better and optimize functioning, now uses a database instead of json files (05/06/2025)
+-- text board (api support ) and even more theming (23/10/2025)

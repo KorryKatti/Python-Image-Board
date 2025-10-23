@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://arc.io/widget.min.js#QbkX6qw5"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Board - Frutiger Aero</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .wallpaper-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1s ease-in-out;
+            z-index: -1;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .post-container, .form-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .post-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #005a9e;
+        }
+        .post-content {
+            font-size: 1.1em;
+            white-space: pre-wrap;
+        }
+        .post-timestamp {
+            font-size: 0.8em;
+            color: #555;
+            margin-top: 15px;
+        }
+        .post-id {
+            font-size: 0.8em;
+            color: #555;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .post-id button {
+            margin-left: 10px;
+            background: #0078d7;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .form-container h2 {
+            color: #005a9e;
+            text-align: center;
+        }
+        .form-container input[type="text"],
+        .form-container textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1em;
+        }
+        .form-container button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background: #0078d7;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    <div id="wallpaper1" class="wallpaper-container"></div>
+    <div id="wallpaper2" class="wallpaper-container"></div>
+
+    <div class="container">
+        <h1>Text Board</h1>
+
+        <div class="form-container">
+            <h2>Create a new post</h2>
+            <form id="post-form" action="/create-text-post" method="post">
+                <input type="text" name="title" placeholder="Title" required>
+                <textarea name="content" placeholder="Content (max 1234 words)" rows="8" required></textarea>
+                <div class="captcha-container">
+                    <label id="captcha-label" for="captcha"></label>
+                    <input type="text" id="captcha" name="captcha" placeholder="Answer" required>
+                </div>
+                <button type="submit">Create Post</button>
+            </form>
+        </div>
+
+        <hr style="border-color: rgba(255,255,255,0.2);">
+
+        {% for post in posts %}
+        <div class="post-container">
+            <div class="post-title">{{ post.title }}</div>
+            <div class="post-content">{{ post.content }}</div>
+            <div classn="post-timestamp">{{ post.timestamp | datetimeformat }}</div>
+            <div class="post-id">
+                <span>ID: {{ post.post_id }}</span>
+                <button onclick="copyToClipboard('{{ post.post_id }}')">Copy ID</button>
+            </div>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #fff;">No posts yet. Create one to get started.</p>
+        {% endfor %}
+
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        const wallpapers = [
+            'https://w.wallhaven.cc/full/pn/wallhaven-pneeln.jpg',
+            'https://w.wallhaven.cc/full/76/wallhaven-76w7vo.jpg',
+            'https://w.wallhaven.cc/full/96/wallhaven-96wkm1.jpg',
+            'https://w.wallhaven.cc/full/zy/wallhaven-zypp2w.jpg',
+            'https://w.wallhaven.cc/full/xl/wallhaven-xl5kzl.jpg',
+            'https://w.wallhaven.cc/full/1p/wallhaven-1p651w.png'
+        ];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        shuffle(wallpapers);
+
+        let currentWallpaper = 0;
+        const wallpaper1 = document.getElementById('wallpaper1');
+        const wallpaper2 = document.getElementById('wallpaper2');
+
+        function changeWallpaper() {
+            const wallpaper1_url = wallpapers[currentWallpaper];
+            const wallpaper2_url = wallpapers[(currentWallpaper + 1) % wallpapers.length];
+
+            wallpaper1.style.backgroundImage = `url(${wallpaper1_url})`;
+            wallpaper2.style.backgroundImage = `url(${wallpaper2_url})`;
+
+            wallpaper1.style.opacity = 1;
+            wallpaper2.style.opacity = 0;
+
+            setTimeout(() => {
+                wallpaper1.style.opacity = 0;
+                wallpaper2.style.opacity = 1;
+                currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
+            }, 9000);
+        }
+
+        setInterval(changeWallpaper, 10000);
+        changeWallpaper();
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Post ID copied to clipboard');
+            }, function(err) {
+                alert('Could not copy text: ', err);
+            });
+        }
+
+        const captchaLabel = document.getElementById('captcha-label');
+        const captchaInput = document.getElementById('captcha');
+        const postForm = document.getElementById('post-form');
+
+        let captchaAnswer;
+
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            captchaAnswer = num1 + num2;
+            captchaLabel.textContent = `What is ${num1} + ${num2}?`;
+        }
+
+        postForm.addEventListener('submit', function(event) {
+            if (parseInt(captchaInput.value) !== captchaAnswer) {
+                event.preventDefault();
+                alert('Incorrect captcha answer. Please try again.');
+                generateCaptcha();
+                captchaInput.value = '';
+            }
+        });
+
+        generateCaptcha();
+
+    </script>
+
+</body>
+</html>
