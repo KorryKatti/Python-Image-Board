@@ -1,17 +1,17 @@
-[tool.poetry]
+[project]
 name = "python-image-board"
 version = "0.1.0"
-description = "This is a simple image board web application built with Python Flask. Users can upload images, which are then displayed on the image board. The images are stored using the ImgBB API, and the application includes basic error handling, comment functionality, and image deletion."
-authors = ["Your Name <you@example.com>"]
+description = "A simple image board web application built with Python Flask."
 readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=3.0.3",
+    "requests>=2.32.3",
+    "python-dotenv>=1.0.1",
+    "bcrypt>=4.0.0",
+    "flask-caching>=2.0.0",
+    "flask-compress>=1.14",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-requests = "^2.32.3"
-python-dotenv = "^1.0.1"
-flask = "^3.0.3"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+no-build = true

@@ -1,18 +1,27 @@
-from email.mime import image  # suspicious, but leaving as-is
-from flask import Flask, render_template, request, redirect, url_for, jsonify,flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, send_from_directory, session
 import requests, json, os, time, logging, uuid
 from collections import defaultdict
 import sqlite3
 from markupsafe import escape
 from dotenv import load_dotenv
+from flask_caching import Cache
+from flask_compress import Compress
 
 load_dotenv()
-
 
 app = Flask(__name__)
 app.secret_key = os.getenv("secret_key", "default_secret")
 API_KEY = os.getenv("api_key")
 UPLOAD_IMAGE_URL = 'https://api.imgbb.com/1/upload'
+
+cache = Cache(app, config={
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 30,
+})
+Compress(app)
+
+secret_board_images = []
+SECRET_BOARD_MAX = 10
 
 from datetime import datetime
 
@@ -20,10 +29,9 @@ from datetime import datetime
 def datetimeformat(value, format='%Y-%m-%d %H:%M:%S'):
     if not value:
         return ''
-    if isinstance(value, (int, float)):  # timestamp input
+    if isinstance(value, (int, float)):
         value = datetime.fromtimestamp(value)
     return value.strftime(format)
-
 
 
 logging.basicConfig(
@@ -35,8 +43,16 @@ logging.basicConfig(
     ]
 )
 
+DB_PATH = 'images.db'
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA synchronous=NORMAL')
+    return conn
+
 def init_db():
-    conn = sqlite3.connect('images.db')
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -73,6 +89,12 @@ def init_db():
         )
     ''')
 
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_images_board ON images(board_name)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_images_id ON images(image_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_comments_image ON comments(image_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_text_posts_ts ON text_posts(timestamp DESC)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_text_posts_id ON text_posts(post_id)')
+
     conn.commit()
     conn.close()
 
@@ -86,7 +108,7 @@ class imgBoardFunctions:
         timestamp = int(time.time())
         image_id = str(uuid.uuid4())
 
-        conn = sqlite3.connect('images.db')
+        conn = get_db()
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO images (timestamp, image_url, board_name, image_id, caption_of_image)
@@ -95,7 +117,16 @@ class imgBoardFunctions:
         conn.commit()
         conn.close()
 
+        cache.delete_memoized(board, board_name)
         logging.info(f'Image uploaded successfully: {image_url} with caption: {caption_of_image}')
+
+
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith('/static/'):
+        response.cache_control.max_age = 86400
+        response.cache_control.public = True
+    return response
 
 
 @app.route('/')
@@ -116,7 +147,6 @@ def upload(board_name):
             return jsonify({'error': 'board name is missing'}), 400
 
         try:
-            # the fix: send image via multipart/form-data
             files = {'image': image}
             params = {'key': API_KEY}
 
@@ -138,16 +168,13 @@ def upload(board_name):
 
             return redirect(url_for('board', board_name=board_name))
 
-
         except requests.RequestException as e:
             logging.error(f'Error uploading image: {e}')
             if e.response is not None:
                 logging.error(f'Response content: {e.response.text}')
             return jsonify({'error': 'failed to upload image'}), 500
 
-    # GET request, just render the board upload page
     return render_template(f'{board_name}.html', message='Upload your image', board_name=board_name)
-
 
 
 @app.route('/comment/<image_id>', methods=['POST'])
@@ -160,7 +187,7 @@ def comment(image_id):
 
     timestamp = int(time.time())
     try:
-        with sqlite3.connect('images.db') as conn:
+        with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT INTO comments (image_id, comment, comment_timestamp) VALUES (?, ?, ?)',
@@ -168,8 +195,10 @@ def comment(image_id):
             )
             cursor.execute('SELECT board_name FROM images WHERE image_id = ?', (image_id,))
             row = cursor.fetchone()
+
         if row:
             board_name = row[0]
+            cache.delete_memoized(board, board_name)
             return redirect(url_for('board', board_name=board_name))
         else:
             flash('Image not found', 'error')
@@ -180,10 +209,10 @@ def comment(image_id):
         return redirect(request.referrer or url_for('index'))
 
 
-
 @app.route('/<board_name>')
+@cache.memoize(timeout=15)
 def board(board_name):
-    conn = sqlite3.connect('images.db')
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -215,7 +244,6 @@ def board(board_name):
     return render_template(f'{board_name}.html', images=images_data, comments=comments_data, board_name=board_name)
 
 
-
 @app.route('/latest-updates')
 def latest_updates():
     update_file_path = os.path.join(app.static_folder, 'latest_updates.txt')
@@ -233,8 +261,9 @@ def rules():
 
 
 @app.route('/text-board')
+@cache.memoize(timeout=15)
 def text_board():
-    conn = sqlite3.connect('images.db')
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -270,7 +299,7 @@ def create_text_post():
     post_id = str(uuid.uuid4())
     board_name = 'text-board'
 
-    conn = sqlite3.connect('images.db')
+    conn = get_db()
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO text_posts (timestamp, board_name, post_id, title, content)
@@ -279,12 +308,13 @@ def create_text_post():
     conn.commit()
     conn.close()
 
+    cache.delete_memoized(text_board)
     return redirect(url_for('text_board'))
 
 
 @app.route('/api/post/<post_id>')
 def get_post(post_id):
-    conn = sqlite3.connect('images.db')
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -312,12 +342,13 @@ def delete_image(image_id):
     if password != os.getenv("delete_password"):
         return jsonify({'error': 'Incorrect password'}), 403
 
-    conn = sqlite3.connect('images.db')
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute('DELETE FROM images WHERE image_id = ?', (image_id,))
         cursor.execute('DELETE FROM comments WHERE image_id = ?', (image_id,))
         conn.commit()
+        cache.clear()
         logging.info(f'Image with ID {image_id} deleted successfully.')
         return jsonify({'message': 'Image deleted successfully'})
     except sqlite3.Error as e:
@@ -327,11 +358,72 @@ def delete_image(image_id):
         conn.close()
 
 
-from flask import send_from_directory
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory('static', 'icon.png')
+
+
+@app.route('/secret', methods=['GET', 'POST'])
+def secret_board():
+    if request.method == 'POST':
+        if request.form.get('passphrase'):
+            answer = request.form.get('passphrase', '').strip().lower()
+            expected = os.getenv('secret_answer', '').strip().lower()
+            if answer == expected:
+                session['secret_authorized'] = True
+                return redirect(url_for('secret_board'))
+            return render_template('secret.html', gate=True, error=True)
+
+        if not session.get('secret_authorized'):
+            return redirect(url_for('secret_board'))
+
+        image = request.files.get('image')
+        caption = request.form.get('caption', '')
+
+        if not image:
+            return jsonify({'error': 'No image provided'}), 400
+
+        try:
+            files = {'image': image}
+            params = {'key': API_KEY}
+            response = requests.post(UPLOAD_IMAGE_URL, files=files, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+            if not data.get('success'):
+                return jsonify({'error': 'Upload failed'}), 400
+
+            entry = {
+                'url': data['data']['url'],
+                'caption': caption,
+                'timestamp': int(time.time()),
+                'id': str(uuid.uuid4())[:8],
+            }
+            secret_board_images.append(entry)
+
+            while len(secret_board_images) > SECRET_BOARD_MAX:
+                secret_board_images.pop(0)
+
+            return redirect(url_for('secret_board'))
+        except requests.RequestException as e:
+            logging.error(f'Secret board upload error: {e}')
+            return jsonify({'error': 'Upload failed'}), 500
+
+    if not session.get('secret_authorized'):
+        return render_template('secret.html', gate=True)
+
+    return render_template('secret.html', images=list(reversed(secret_board_images)))
+
+
+@app.route('/api/secret')
+def secret_board_api():
+    if not session.get('secret_authorized'):
+        return jsonify({'error': 'unauthorized'}), 401
+    return jsonify({
+        'count': len(secret_board_images),
+        'max': SECRET_BOARD_MAX,
+        'images': list(reversed(secret_board_images)),
+    })
 
 
 if __name__ == '__main__':

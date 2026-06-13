@@ -4,148 +4,575 @@
     <script async src="https://arc.io/widget.min.js#QbkX6qw5"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Board - Frutiger Aero</title>
+    <title>Text Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
+        :root {
+            --bg: #1a1714;
+            --surface: #242018;
+            --surface-hover: #2e2a20;
+            --border: #3d362a;
+            --border-accent: #c8973e;
+            --text: #d4c9b8;
+            --text-dim: #8a7e6e;
+            --text-bright: #f0e6d6;
+            --accent: #c8973e;
+            --accent-dim: #8a6a2e;
+            --accent-glow: rgba(200, 151, 62, 0.15);
+            --post-num: #6b8a5e;
+            --link: #c8973e;
+        }
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-        .wallpaper-container {
+
+        body {
+            font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .site-wrapper {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .board-header {
+            text-align: center;
+            padding: 48px 0 36px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        .board-header h1 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--text-bright);
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .board-header .board-subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75em;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .board-header .board-divider {
+            width: 40px;
+            height: 2px;
+            background: var(--accent);
+            margin: 16px auto 0;
+        }
+
+        .new-post-section {
+            margin-bottom: 36px;
+        }
+
+        .new-post-toggle {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85em;
+            padding: 14px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .new-post-toggle:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent-dim);
+        }
+
+        .new-post-toggle .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+
+        .new-post-form {
+            display: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: none;
+            padding: 24px;
+        }
+
+        .new-post-form.active {
+            display: block;
+        }
+
+        .new-post-form h2 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-bright);
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 0.95em;
+            padding: 10px 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-dim);
+            opacity: 0.6;
+        }
+
+        .captcha-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+        }
+
+        .captcha-row .captcha-question {
+            flex: 1;
+        }
+
+        .captcha-row .captcha-answer {
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .captcha-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8em;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--accent);
+            border: none;
+            color: var(--bg);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 6px;
+        }
+
+        .submit-btn:hover {
+            background: var(--text-bright);
+        }
+
+        .posts-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .posts-header h2 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .posts-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7em;
+            color: var(--text-dim);
+        }
+
+        .post-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            margin-bottom: 2px;
+            transition: border-color 0.2s ease;
+            position: relative;
+        }
+
+        .post-card:hover {
+            border-color: var(--accent-dim);
+        }
+
+        .post-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .post-card:hover::before {
+            opacity: 1;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 14px 20px 0;
+        }
+
+        .post-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: var(--post-num);
+        }
+
+        .post-title {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.15em;
+            font-weight: 700;
+            color: var(--text-bright);
+            flex: 1;
+        }
+
+        .post-body {
+            padding: 10px 20px 14px;
+            font-size: 0.95em;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .post-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7em;
+            color: var(--text-dim);
+        }
+
+        .post-meta .timestamp {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-meta .post-id-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .copy-id-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65em;
+            padding: 3px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .copy-id-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .copy-id-btn.copied {
+            border-color: var(--post-num);
+            color: var(--post-num);
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .embed-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-size: cover;
-            background-position: center;
-            transition: opacity 1s ease-in-out;
-            z-index: -1;
-        }
-        .container {
-            position: relative;
-            z-index: 2;
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        .post-container, .form-container {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            margin-bottom: 20px;
-            padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        .post-title {
-            font-size: 1.8em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #005a9e;
-        }
-        .post-content {
-            font-size: 1.1em;
-            white-space: pre-wrap;
-        }
-        .post-timestamp {
-            font-size: 0.8em;
-            color: #555;
-            margin-top: 15px;
-        }
-        .post-id {
-            font-size: 0.8em;
-            color: #555;
-            margin-top: 10px;
-            display: flex;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
             align-items: center;
+            justify-content: center;
         }
-        .post-id button {
-            margin-left: 10px;
-            background: #0078d7;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+        .embed-overlay.active {
+            display: flex;
         }
-        .form-container h2 {
-            color: #005a9e;
-            text-align: center;
+
+        .embed-modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 24px;
+            max-width: 560px;
+            width: 90%;
+            position: relative;
         }
-        .form-container input[type="text"],
-        .form-container textarea {
+
+        .embed-modal h3 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 14px;
+        }
+
+        .embed-modal textarea {
             width: 100%;
-            padding: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75em;
+            padding: 10px 12px;
+            resize: none;
+            height: 100px;
+            outline: none;
             margin-bottom: 12px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            font-size: 1em;
         }
-        .form-container button {
-            display: block;
-            width: 100%;
-            padding: 12px 20px;
-            background: #0078d7;
-            border: none;
-            color: white;
+
+        .embed-modal .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .embed-modal .modal-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 7px 14px;
             cursor: pointer;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .embed-modal .modal-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        .embed-modal .modal-btn.primary:hover {
+            background: var(--text-bright);
+        }
+
+        .embed-modal .modal-btn.secondary {
+            background: none;
+            color: var(--text-dim);
+        }
+
+        .embed-modal .modal-btn.secondary:hover {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 2.5em;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8em;
+            letter-spacing: 0.03em;
+        }
+
+        @media (max-width: 600px) {
+            .site-wrapper {
+                padding: 0 12px 40px;
+            }
+
+            .board-header h1 {
+                font-size: 1.6em;
+            }
+
+            .post-header {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .post-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .captcha-row {
+                flex-direction: column;
+            }
+
+            .captcha-row .captcha-answer {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     {% include 'header.html' %}
-    <div id="wallpaper1" class="wallpaper-container"></div>
-    <div id="wallpaper2" class="wallpaper-container"></div>
 
-    <div class="container">
-        <h1>Text Board</h1>
-
-        <div class="form-container">
-            <h2>Create a new post</h2>
-            <form id="post-form" action="/create-text-post" method="post">
-                <input type="text" name="title" placeholder="Title" required>
-                <textarea name="content" placeholder="Content (max 1234 words)" rows="8" required></textarea>
-                <div class="captcha-container">
-                    <label id="captcha-label" for="captcha"></label>
-                    <input type="text" id="captcha" name="captcha" placeholder="Answer" required>
-                </div>
-                <button type="submit">Create Post</button>
-            </form>
+    <div class="site-wrapper">
+        <div class="board-header">
+            <h1>Text Board</h1>
+            <div class="board-subtitle">discussions &bull; threads &bull; posts</div>
+            <div class="board-divider"></div>
         </div>
 
-        <hr style="border-color: rgba(255,255,255,0.2);">
+        <div class="new-post-section">
+            <button class="new-post-toggle" onclick="toggleForm()">
+                <span class="toggle-icon">+</span>
+                <span>New Thread</span>
+            </button>
+            <div class="new-post-form" id="post-form-container">
+                <h2>Start a New Thread</h2>
+                <form id="post-form" action="/create-text-post" method="post">
+                    <div class="form-group">
+                        <label for="title">Subject</label>
+                        <input type="text" id="title" name="title" placeholder="Thread title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">Message</label>
+                        <textarea id="content" name="content" placeholder="Write your post..." rows="8" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Verification</label>
+                        <div class="captcha-row">
+                            <div class="captcha-question">
+                                <span class="captcha-label" id="captcha-label"></span>
+                            </div>
+                            <div class="captcha-answer">
+                                <input type="text" id="captcha" name="captcha" placeholder="Answer" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn">Post Thread</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="posts-header">
+            <h2>Recent Threads</h2>
+            <span class="posts-count">{{ posts | length }} thread{{ 's' if posts | length != 1 else '' }}</span>
+        </div>
 
         {% for post in posts %}
-        <div class="post-container">
-            <div class="post-title">{{ post.title }}</div>
-            <div class="post-content">{{ post.content }}</div>
-            <div classn="post-timestamp">{{ post.timestamp | datetimeformat }}</div>
-            <div class="post-id">
-                <span>ID: {{ post.post_id }}</span>
-                <button onclick="copyToClipboard('{{ post.post_id }}')">Copy ID</button>
+        <div class="post-card">
+            <div class="post-header">
+                <span class="post-number">#{{ loop.index }}</span>
+                <span class="post-title">{{ post.title }}</span>
+            </div>
+            <div class="post-body">{{ post.content }}</div>
+            <div class="post-footer">
+                <div class="post-meta">
+                    <span class="timestamp">{{ post.timestamp | datetimeformat }}</span>
+                    <span class="post-id-display">ID: {{ post.post_id }}</span>
+                </div>
+                <div class="post-actions">
+                    <button class="copy-id-btn" onclick="copyText(this)" data-title="{{ post.title }}" data-content="{{ post.content }}">Copy Text</button>
+                    <button class="copy-id-btn" onclick="showEmbed('{{ post.post_id }}', '{{ post.title | e }}')">Embed</button>
+                    <button class="copy-id-btn" onclick="copyId(this, '{{ post.post_id }}')">Copy ID</button>
+                </div>
             </div>
         </div>
         {% else %}
-        <p style="text-align: center; color: #fff;">No posts yet. Create one to get started.</p>
+        <div class="empty-state">
+            <div class="empty-icon">&#9776;</div>
+            <p>No threads yet. Start the first one.</p>
+        </div>
         {% endfor %}
+    </div>
 
+    <div class="embed-overlay" id="embed-overlay" onclick="closeEmbed(event)">
+        <div class="embed-modal">
+            <h3>Embed this post</h3>
+            <textarea id="embed-code" readonly></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="document.getElementById('embed-overlay').classList.remove('active')">Close</button>
+                <button class="modal-btn primary" onclick="copyEmbedCode()">Copy Code</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -159,60 +586,63 @@
             });
         }
 
-        const wallpapers = [
-            'https://w.wallhaven.cc/full/pn/wallhaven-pneeln.jpg',
-            'https://w.wallhaven.cc/full/76/wallhaven-76w7vo.jpg',
-            'https://w.wallhaven.cc/full/96/wallhaven-96wkm1.jpg',
-            'https://w.wallhaven.cc/full/zy/wallhaven-zypp2w.jpg',
-            'https://w.wallhaven.cc/full/xl/wallhaven-xl5kzl.jpg',
-            'https://w.wallhaven.cc/full/1p/wallhaven-1p651w.png'
-        ];
+        function toggleForm() {
+            const form = document.getElementById('post-form-container');
+            const icon = document.querySelector('.toggle-icon');
+            form.classList.toggle('active');
+            icon.textContent = form.classList.contains('active') ? '−' : '+';
+        }
 
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        function copyId(btn, id) {
+            navigator.clipboard.writeText(id).then(() => {
+                btn.textContent = 'Copied';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy ID';
+                    btn.classList.remove('copied');
+                }, 1500);
+            });
+        }
+
+        function copyText(btn) {
+            const title = btn.dataset.title;
+            const content = btn.dataset.content;
+            const text = title + '\n\n' + content;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = 'Copied';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy Text';
+                    btn.classList.remove('copied');
+                }, 1500);
+            });
+        }
+
+        function showEmbed(postId, title) {
+            const url = window.location.origin + '/text-board#' + postId;
+            const code = '<iframe src="' + url + '" width="100%" height="400" frameborder="0"></iframe>';
+            document.getElementById('embed-code').value = code;
+            document.getElementById('embed-overlay').classList.add('active');
+        }
+
+        function closeEmbed(e) {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.classList.remove('active');
             }
         }
 
-        shuffle(wallpapers);
-
-        let currentWallpaper = 0;
-        const wallpaper1 = document.getElementById('wallpaper1');
-        const wallpaper2 = document.getElementById('wallpaper2');
-
-        function changeWallpaper() {
-            const wallpaper1_url = wallpapers[currentWallpaper];
-            const wallpaper2_url = wallpapers[(currentWallpaper + 1) % wallpapers.length];
-
-            wallpaper1.style.backgroundImage = `url(${wallpaper1_url})`;
-            wallpaper2.style.backgroundImage = `url(${wallpaper2_url})`;
-
-            wallpaper1.style.opacity = 1;
-            wallpaper2.style.opacity = 0;
-
-            setTimeout(() => {
-                wallpaper1.style.opacity = 0;
-                wallpaper2.style.opacity = 1;
-                currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
-            }, 9000);
-        }
-
-        setInterval(changeWallpaper, 10000);
-        changeWallpaper();
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(function() {
-                alert('Post ID copied to clipboard');
-            }, function(err) {
-                alert('Could not copy text: ', err);
-            });
+        function copyEmbedCode() {
+            const textarea = document.getElementById('embed-code');
+            textarea.select();
+            navigator.clipboard.writeText(textarea.value);
+            const btn = document.querySelector('.embed-modal .modal-btn.primary');
+            btn.textContent = 'Copied';
+            setTimeout(() => { btn.textContent = 'Copy Code'; }, 1500);
         }
 
         const captchaLabel = document.getElementById('captcha-label');
         const captchaInput = document.getElementById('captcha');
         const postForm = document.getElementById('post-form');
-
         let captchaAnswer;
 
         function generateCaptcha() {
@@ -225,14 +655,14 @@
         postForm.addEventListener('submit', function(event) {
             if (parseInt(captchaInput.value) !== captchaAnswer) {
                 event.preventDefault();
-                alert('Incorrect captcha answer. Please try again.');
+                captchaInput.style.borderColor = '#c0392b';
+                setTimeout(() => { captchaInput.style.borderColor = ''; }, 1500);
                 generateCaptcha();
                 captchaInput.value = '';
             }
         });
 
         generateCaptcha();
-
     </script>
 
 </body>

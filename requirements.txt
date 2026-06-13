@@ -2,3 +2,5 @@ flask
 requests
 python-dotenv
 bcrypt
+flask-caching
+flask-compress

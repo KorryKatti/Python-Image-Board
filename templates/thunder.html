@@ -6,291 +6,425 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Thunder Image Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #fff;
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --border: #1e1e1e;
+            --text: #7a8088;
+            --text-dim: #444a52;
+            --text-bright: #b0b8c4;
+            --accent: #5a9a8a;
+            --accent-dim: #3d6b5e;
+            --red: #8a3a3a;
+            --red-bright: #b05050;
         }
 
-        .container {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 13px;
+            min-height: 100vh;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--text-bright);
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            color: var(--text-bright);
+        }
+
+        .site-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
             display: flex;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
             gap: 30px;
         }
 
         .sidebar {
-            flex: 1 1 250px;
-            padding-right: 20px;
+            flex: 0 0 200px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            gap: 16px;
+        }
+
+        .sidebar h2 {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
         }
 
         .sidebar img {
             max-width: 100%;
-            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
-        .content {
-            flex: 3 1 700px;
-            padding-left: 20px;
+        .sidebar p {
+            font-size: 0.85em;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .board-title {
+            font-size: 1.4em;
+            color: var(--text-bright);
+            margin-bottom: 4px;
+        }
+
+        .board-sub {
+            font-size: 0.8em;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        .notice {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            color: var(--text-dim);
+            font-size: 0.85em;
+        }
+
+        .notice strong {
+            color: var(--red-bright);
+        }
+
+        .upload-form {
             display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .stats {
-            flex: 1 1 250px;
-            padding-left: 20px;
-            font-size: 14px;
-            color: #aaa;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
-        }
-
-        h1,
-        h2,
-        h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-
-        .warning {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 15px;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .buttons {
-            margin-bottom: 0;
-        }
-
-        .buttons form {
-            display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .buttons input[type="file"] {
-            flex: 1 1 160px;
-            border-radius: 15px;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+        .upload-form input[type="file"] {
+            flex: 1 1 140px;
+            padding: 6px 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85em;
             cursor: pointer;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        .buttons input[type="text"] {
-            flex: 2 1 250px;
-            padding: 8px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .buttons button {
-            padding: 8px 18px;
-            background: rgba(224, 60, 60, 0.8);
+        .upload-form input[type="file"]::-webkit-file-upload-button {
+            background: var(--border);
             border: none;
-            color: white;
+            color: var(--text-dim);
+            padding: 4px 10px;
+            font-family: inherit;
+            font-size: 0.85em;
             cursor: pointer;
-            border-radius: 15px;
+            margin-right: 8px;
+        }
+
+        .upload-form input[type="text"] {
+            flex: 2 1 200px;
+            padding: 6px 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85em;
+            outline: none;
+        }
+
+        .upload-form input[type="text"]:focus {
+            border-color: var(--accent-dim);
+        }
+
+        .upload-form input[type="text"]::placeholder {
+            color: var(--text-dim);
+        }
+
+        .upload-form button {
+            padding: 6px 14px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-dim);
+            color: var(--bg);
+            font-family: inherit;
+            font-size: 0.8em;
             font-weight: 600;
-            flex-shrink: 0;
-            transition: background-color 0.3s ease;
-            border: 1px solid rgba(224, 60, 60, 1);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .buttons button:hover {
-            background: #bf2e2e;
+        .upload-form button:hover {
+            background: var(--accent);
+            border-color: var(--accent);
         }
 
-        .image-container {
-            margin-bottom: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            background: rgba(0, 0, 0, 0.5);
+        .post {
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .post-header {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding-bottom: 12px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .image-details {
-            background: rgba(0, 0, 0, 0.5);
+            align-items: baseline;
+            gap: 10px;
             padding: 8px 12px;
-            font-size: 15px;
-            font-weight: bold;
-            text-align: center;
-            user-select: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
         }
 
-        .image-container img {
+        .post-caption {
+            font-weight: 600;
+            color: var(--text-bright);
+            font-size: 0.9em;
+        }
+
+        .post-img {
             display: block;
             max-width: 100%;
             height: auto;
-            border-bottom: 1px solid #444;
-            border-radius: 0 0 8px 8px;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75em;
+            color: var(--text-dim);
         }
 
         .comment-section {
-            padding: 0 12px;
-            border-top: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            border-top: 1px solid var(--border);
         }
 
-        .comment-section h3 {
-            margin-top: 0;
-            margin-bottom: 8px;
+        .comment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comment-header h3 {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
             font-weight: 600;
-            user-select: none;
         }
 
-        .comment-section form {
+        .comment-form {
             display: flex;
-            gap: 10px;
+            gap: 6px;
+            padding: 6px 12px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .comment-section input[type="text"] {
+        .comment-form input[type="text"] {
             flex: 1;
-            padding: 8px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-size: 14px;
-            outline-offset: 2px;
-            outline-color: transparent;
-            transition: outline-color 0.2s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            padding: 5px 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85em;
+            outline: none;
         }
 
-        .comment-section input[type="text"]:focus {
-            outline-color: #e03c3c;
-            background: rgba(0, 0, 0, 0.7);
+        .comment-form input[type="text"]:focus {
+            border-color: var(--accent-dim);
         }
 
-        .comment-section button {
-            padding: 8px 18px;
-            background: rgba(224, 60, 60, 0.8);
-            border: none;
-            color: white;
+        .comment-form input[type="text"]::placeholder {
+            color: var(--text-dim);
+        }
+
+        .comment-form button {
+            padding: 5px 12px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.8em;
             cursor: pointer;
-            border-radius: 15px;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-            border: 1px solid rgba(224, 60, 60, 1);
         }
 
-        .comment-section button:hover {
-            background: #bf2e2e;
+        .comment-form button:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent-dim);
+            color: var(--bg);
         }
 
         .comment-list {
             list-style: none;
-            padding-left: 0;
-            max-height: 150px;
+            max-height: 140px;
             overflow-y: auto;
-            font-size: 13px;
-            border-top: 1px solid #222;
-            margin-top: 0;
-            user-select: text;
         }
 
         .comment-list li {
-            border-bottom: 1px solid #333;
-            padding: 6px 4px;
-            line-height: 1.3;
+            padding: 5px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .comment-list li:last-child {
+            border-bottom: none;
         }
 
         .comment-list li small {
-            color: #999;
-            font-size: 11px;
+            color: var(--text-dim);
+            font-size: 0.85em;
             margin-left: 6px;
-            user-select: none;
         }
 
-        .delete-image form {
-            margin-top: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .delete-image input[type="password"] {
-            flex: 1;
-            padding: 8px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            font-size: 14px;
-            outline-offset: 2px;
-            outline-color: transparent;
-            transition: outline-color 0.2s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .delete-image input[type="password"]:focus {
-            outline-color: #d93025;
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .delete-image button {
-            padding: 8px 18px;
-            background: rgba(217, 48, 37, 0.8);
-            border: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 15px;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-            border: 1px solid rgba(217, 48, 37, 1);
-        }
-
-        .delete-image button:hover {
-            background: #a5271d;
-        }
-
-        /* Scrollbar for comments */
         .comment-list::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
 
         .comment-list::-webkit-scrollbar-thumb {
-            background-color: #e03c3c;
-            border-radius: 3px;
+            background: var(--border);
+        }
+
+        .delete-section {
+            padding: 6px 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .delete-section input[type="password"] {
+            flex: 1;
+            padding: 5px 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85em;
+            outline: none;
+        }
+
+        .delete-section input[type="password"]:focus {
+            border-color: var(--red);
+        }
+
+        .delete-section input[type="password"]::placeholder {
+            color: var(--text-dim);
+        }
+
+        .delete-section button {
+            padding: 5px 12px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .delete-section button:hover {
+            background: var(--red);
+            border-color: var(--red);
+            color: var(--bg);
+        }
+
+        .btn-readmore {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-family: inherit;
+            font-size: 0.75em;
+            cursor: pointer;
+            padding: 0 12px 6px;
+            text-align: left;
+        }
+
+        .btn-readmore:hover {
+            color: var(--text-bright);
+        }
+
+        .stats {
+            flex: 0 0 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stats h2 {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .stats img {
+            border: 1px solid var(--border);
+            image-rendering: pixelated;
+        }
+
+        .stats p {
+            font-size: 0.8em;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .site-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar, .stats {
+                flex: none;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .sidebar h2, .stats h2 {
+                width: 100%;
+            }
+
+            .upload-form {
+                flex-direction: column;
+            }
+
+            .upload-form input[type="file"],
+            .upload-form input[type="text"] {
+                flex: none;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -298,39 +432,42 @@
 <body>
     {% include 'header.html' %}
 
-    <div class="container">
+    <div class="site-wrapper">
         <div class="sidebar">
             <h2>Advertisements</h2>
-            <a href="https://thunderenv.glitch.me/" target="_blank" rel="noopener noreferrer">
+            <a href="https://korrykatti.github.io/Thunder/" target="_blank" rel="noopener noreferrer">
                 <img src="https://files.catbox.moe/234s73.png" alt="Advertisement" />
             </a>
-            <p>To Advertise here, contact <a href="https://x.com/dunkelkron" target="_blank" rel="noopener noreferrer">here</a></p>
+            <p>To advertise here, contact <a href="https://x.com/dunkelkron" target="_blank" rel="noopener noreferrer">@dunkelkron</a></p>
         </div>
 
-        <div class="content">
-            <h1>Welcome To Thunder Image Board - {{ board_name | escape }}</h1>
+        <div class="main">
+            <h1 class="board-title">Thunder /{{ board_name | escape }}/</h1>
+            <div class="board-sub">image board</div>
 
-            <div class="warning">
-                Warning: Images may be cleared automatically. Do not use as permanent storage. No NSFW.
+            <div class="notice">
+                <strong>!</strong> Images may be cleared automatically. Do not use as permanent storage. No NSFW.
             </div>
 
-            <div class="buttons">
-                <form action="{{ url_for('upload', board_name=board_name) }}" method="post" enctype="multipart/form-data" autocomplete="off">
-                    <input type="file" name="image" accept="image/*" required />
-                    <input type="text" name="caption" placeholder="Caption (optional)" />
-                    <button type="submit">Upload Image</button>
-                </form>
-            </div>
+            <form class="upload-form" action="{{ url_for('upload', board_name=board_name) }}" method="post" enctype="multipart/form-data" autocomplete="off">
+                <input type="file" name="image" accept="image/*" required />
+                <input type="text" name="caption" placeholder="Caption (optional)" />
+                <button type="submit">Upload</button>
+            </form>
 
             {% for image in images %}
-            <div class="image-container" id="image-{{ image.image_id }}">
-                <div class="image-details">{{ image.caption_of_image | escape }}</div>
-                <img src="{{ image.image_url | escape }}" alt="Uploaded Image" />
+            <div class="post" id="image-{{ image.image_id }}">
+                <div class="post-header">
+                    <span class="post-caption">{{ image.caption_of_image | escape }}</span>
+                </div>
+                <img class="post-img" src="{{ image.image_url | escape }}" alt="Uploaded Image" />
 
                 <div class="comment-section">
-                    <h3>Comments</h3>
-                    <form action="{{ url_for('comment', image_id=image.image_id) }}" method="post" autocomplete="off">
-                        <input type="text" name="comment" placeholder="Add a comment" required />
+                    <div class="comment-header">
+                        <h3>Replies</h3>
+                    </div>
+                    <form class="comment-form" action="{{ url_for('comment', image_id=image.image_id) }}" method="post" autocomplete="off">
+                        <input type="text" name="comment" placeholder="Reply..." required />
                         <button type="submit">Post</button>
                     </form>
                     <ul class="comment-list" id="comments-{{ image.image_id }}">
@@ -338,35 +475,35 @@
                         {% for comment in image_comments %}
                         <li class="{{ 'hidden-comment' if loop.index > 5 else '' }}">
                             {{ comment.comment | escape }}
-                            <small>({{ comment.comment_timestamp | datetimeformat }})</small>
+                            <small>{{ comment.comment_timestamp | datetimeformat }}</small>
                         </li>
                         {% endfor %}
                         {% if image_comments|length == 0 %}
-                        <li>No comments yet.</li>
+                        <li style="color: var(--text-dim);">No replies yet.</li>
                         {% endif %}
                     </ul>
                     {% if image_comments|length > 5 %}
-                    <button class="btn-readmore" id="read-more-{{ image.image_id }}">Show More</button>
+                    <button class="btn-readmore" id="read-more-{{ image.image_id }}">+ {{ image_comments|length - 5 }} more</button>
                     {% endif %}
                 </div>
 
-                <div class="delete-image">
-                    <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="post" autocomplete="off">
-                        <input type="password" name="password" placeholder="Password to delete" required />
-                        <button type="submit">Delete</button>
+                <div class="delete-section">
+                    <form action="{{ url_for('delete_image', image_id=image.image_id) }}" method="post" autocomplete="off" style="display:flex;gap:6px;flex:1;">
+                        <input type="password" name="password" placeholder="Delete key" required />
+                        <button type="submit">Del</button>
                     </form>
                 </div>
             </div>
             {% else %}
-            <p>No images yet. Upload one to get started.</p>
+            <p style="color: var(--text-dim);">No images yet.</p>
             {% endfor %}
         </div>
 
         <div class="stats">
             <h2>Stats</h2>
             <img src="http://counter.seku.su/cmoe?name=thunderimageboard" alt="thunderimageboard" />
-            <p>Sorry for the ads, gotta fund the projects.</p>
-            <p>Download Thunder <a href="https://github.com/KorryKatti/Thunder" target="_blank" rel="noopener noreferrer">here.</a></p>
+            <p>Fund the projects.</p>
+            <p><a href="https://github.com/KorryKatti/Thunder" target="_blank" rel="noopener noreferrer">Source</a></p>
         </div>
     </div>
 
