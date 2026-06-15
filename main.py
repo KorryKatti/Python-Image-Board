@@ -126,6 +126,10 @@ def add_cache_headers(response):
     if request.path.startswith('/static/'):
         response.cache_control.max_age = 86400
         response.cache_control.public = True
+    if request.path.startswith('/api/json/'):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     return response
 
 
@@ -423,6 +427,261 @@ def secret_board_api():
         'count': len(secret_board_images),
         'max': SECRET_BOARD_MAX,
         'images': list(reversed(secret_board_images)),
+    })
+
+
+# ── Mobile JSON API ──────────────────────────────────────────────
+
+@app.route('/api/json/boards')
+def api_json_boards():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT DISTINCT board_name FROM images ORDER BY board_name')
+    boards = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return jsonify({'boards': boards})
+
+
+@app.route('/api/json/board/<board_name>')
+def api_json_board(board_name):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT image_url, board_name, caption_of_image, image_id, timestamp
+        FROM images
+        WHERE board_name = ?
+        ORDER BY timestamp DESC
+    ''', (board_name,))
+    images = cursor.fetchall()
+
+    image_ids = [img[3] for img in images]
+    comments = []
+    if image_ids:
+        placeholders = ','.join('?' * len(image_ids))
+        cursor.execute(f'''
+            SELECT comment, comment_timestamp, image_id
+            FROM comments
+            WHERE image_id IN ({placeholders})
+            ORDER BY comment_timestamp DESC
+        ''', image_ids)
+        comments = cursor.fetchall()
+    conn.close()
+
+    images_data = [
+        {
+            'image_url': img[0],
+            'board_name': img[1],
+            'caption': img[2],
+            'image_id': img[3],
+            'timestamp': img[4],
+        }
+        for img in images
+    ]
+
+    comments_by_image = {}
+    for com in comments:
+        img_id = com[2]
+        if img_id not in comments_by_image:
+            comments_by_image[img_id] = []
+        comments_by_image[img_id].append({
+            'comment': com[0],
+            'timestamp': com[1],
+        })
+
+    for img in images_data:
+        img['comments'] = comments_by_image.get(img['image_id'], [])
+
+    return jsonify({'board_name': board_name, 'images': images_data})
+
+
+@app.route('/api/json/upload/<board_name>', methods=['POST'])
+def api_json_upload(board_name):
+    image = request.files.get('image')
+    caption = request.form.get('caption', '')
+
+    if not image:
+        return jsonify({'error': 'No image provided'}), 400
+
+    try:
+        files = {'image': image}
+        params = {'key': API_KEY}
+        response = requests.post(UPLOAD_IMAGE_URL, files=files, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        if not data.get('success'):
+            return jsonify({'error': 'imgbb upload failed', 'details': data.get('error', 'unknown')}), 400
+
+        image_url = data['data']['url']
+
+        img_board = imgBoardFunctions()
+        timestamp = int(time.time())
+        image_id = str(uuid.uuid4())
+
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO images (timestamp, image_url, board_name, image_id, caption_of_image)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (timestamp, image_url, board_name, image_id, caption))
+        conn.commit()
+        conn.close()
+
+        cache.delete_memoized(board, board_name)
+
+        return jsonify({
+            'message': 'Image uploaded successfully',
+            'image': {
+                'image_url': image_url,
+                'board_name': board_name,
+                'caption': caption,
+                'image_id': image_id,
+                'timestamp': timestamp,
+            },
+        }), 201
+
+    except requests.RequestException as e:
+        logging.error(f'API upload error: {e}')
+        return jsonify({'error': 'Upload failed'}), 500
+
+
+@app.route('/api/json/comment/<image_id>', methods=['POST'])
+def api_json_comment(image_id):
+    data = request.get_json(silent=True)
+    comment_text = ''
+    if data and 'comment' in data:
+        comment_text = data['comment'].strip()
+    elif request.form.get('comment'):
+        comment_text = request.form.get('comment', '').strip()
+
+    if not comment_text:
+        return jsonify({'error': 'Comment cannot be empty'}), 400
+
+    safe_comment = escape(comment_text)
+    timestamp = int(time.time())
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO comments (image_id, comment, comment_timestamp) VALUES (?, ?, ?)',
+            (image_id, safe_comment, timestamp)
+        )
+        cursor.execute('SELECT board_name FROM images WHERE image_id = ?', (image_id,))
+        row = cursor.fetchone()
+        conn.commit()
+        conn.close()
+
+        if not row:
+            return jsonify({'error': 'Image not found'}), 404
+
+        cache.delete_memoized(board, row[0])
+
+        return jsonify({
+            'message': 'Comment added',
+            'comment': {
+                'comment': safe_comment,
+                'timestamp': timestamp,
+                'image_id': image_id,
+            },
+        }), 201
+
+    except Exception as e:
+        logging.error(f'API comment error: {e}')
+        return jsonify({'error': 'Failed to save comment'}), 500
+
+
+@app.route('/api/json/text-board')
+def api_json_text_board():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT title, content, timestamp, post_id
+        FROM text_posts
+        ORDER BY timestamp DESC
+    ''')
+    posts = cursor.fetchall()
+    conn.close()
+
+    posts_data = [
+        {
+            'title': post[0],
+            'content': post[1],
+            'timestamp': post[2],
+            'post_id': post[3],
+        }
+        for post in posts
+    ]
+
+    return jsonify({'posts': posts_data})
+
+
+@app.route('/api/json/text-board/create', methods=['POST'])
+def api_json_create_text_post():
+    data = request.get_json(silent=True)
+    title = ''
+    content = ''
+
+    if data:
+        title = data.get('title', '').strip()
+        content = data.get('content', '').strip()
+    else:
+        title = request.form.get('title', '').strip()
+        content = request.form.get('content', '').strip()
+
+    if not title or not content:
+        return jsonify({'error': 'Title and content are required'}), 400
+
+    if len(content.split()) > 1234:
+        return jsonify({'error': 'Post content cannot exceed 1234 words'}), 400
+
+    timestamp = int(time.time())
+    post_id = str(uuid.uuid4())
+    board_name = 'text-board'
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO text_posts (timestamp, board_name, post_id, title, content)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (timestamp, board_name, post_id, title, content))
+    conn.commit()
+    conn.close()
+
+    cache.delete_memoized(text_board)
+
+    return jsonify({
+        'message': 'Post created',
+        'post': {
+            'title': title,
+            'content': content,
+            'timestamp': timestamp,
+            'post_id': post_id,
+        },
+    }), 201
+
+
+@app.route('/api/json/post/<post_id>')
+def api_json_get_post(post_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT title, content, timestamp
+        FROM text_posts
+        WHERE post_id = ?
+    ''', (post_id,))
+    post = cursor.fetchone()
+    conn.close()
+
+    if not post:
+        return jsonify({'error': 'Post not found'}), 404
+
+    return jsonify({
+        'title': post[0],
+        'content': post[1],
+        'timestamp': post[2],
+        'post_id': post_id,
     })
 
 
